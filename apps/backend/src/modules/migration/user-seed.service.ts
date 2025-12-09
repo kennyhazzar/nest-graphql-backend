@@ -63,7 +63,7 @@ export class UserSeedService {
         ) {
           throw new Error('Admin password must be at least 8 characters long and strong');
         }
-        const roleAdmin = await this.userRoleRepository.findByType(RoleType.ADMIN);
+        const roleAdmin = await this.userRoleRepository.findByType(RoleType.MODERATOR);
         if (!roleAdmin) {
           throw new Error('Role for admin user not found');
         }

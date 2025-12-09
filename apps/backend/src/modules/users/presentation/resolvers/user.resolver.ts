@@ -83,8 +83,7 @@ export class UserResolver {
   }
 
   @Query(() => UserDto)
-  @UseGuards(JwtAuthGuard, PoliciesGuard)
-  @Policy(Actions.READ, Subjects.USER)
+  @UseGuards(JwtAuthGuard)
   async user(@CurrentUserId() userId: IdType): Promise<UserDto> {
     return this.queryBus.execute(new UserGetByIdQuery(userId));
   }
