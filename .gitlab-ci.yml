@@ -1,0 +1,393 @@
+variables:
+  HUSKY: 0
+  # Configure deployment paths as needed
+  DEV_DEPLOY_PATH: /var/www/development/api-gateway/
+  PROD_DEPLOY_PATH: /var/www/production/api-gateway/
+
+stages:
+  - test_stage
+  - dev_dependencies_stage
+  - dev_build_deploy_stage
+  - prod_dependencies_stage
+  - prod_build_deploy_stage
+
+before_script:
+  - node -v
+  - pwd
+  - echo -n "$CI_ENVIRONMENT_NAME"
+
+.cache_common: &cache_common
+  key:
+    files:
+      - package.json
+      - yarn.lock
+  unprotect: false
+  paths:
+    - node_modules/
+
+.cache_pull_push: &cache_pull_push
+  <<: *cache_common
+  policy: pull-push
+
+.cache_pull: &cache_pull
+  <<: *cache_common
+  policy: pull
+
+.rsync_excludes: &rsync_excludes
+  - --include="exceljs/**/doc/"
+  - --exclude="**/AUTHORS"
+  - --exclude="**/ChangeLog"
+  - --exclude="**/CHANGES"
+  - --exclude="**/README.markdown"
+  - --exclude="**/README.mdown"
+  - --exclude="**/readme.markdown"
+  - --exclude="**/NOTICE"
+  - --exclude="**/LICENSE"
+  - --exclude="**/License"
+  - --exclude="**/LICENSE.*"
+  - --exclude="**/LICENCE"
+  - --exclude="**/license"
+  - --exclude="**/.babelrc"
+  - --exclude="**/.editorconfig"
+  - --exclude="**/.gitattributes"
+  - --exclude="**/.travis*"
+  - --exclude="**/.prettierrc*"
+  - --exclude="**/.airtap.*"
+  - --exclude="**/Gruntfile.*"
+  - --exclude="**/.npmignore"
+  - --exclude="**/.nvmrc"
+  - --exclude="**/.eslint*"
+  - --exclude="**/.nycrc*"
+  - --exclude="**/.jshintrc"
+  - --exclude="**/renovate.json"
+  - --exclude="**/jest.*"
+  - --exclude="**/bower.json"
+  - --exclude="**/.taprc*"
+  - --exclude="**/.commitlintrc.*"
+  - --exclude="**/.release-it.json"
+  - --exclude="**/nest-cli.json"
+  - --exclude="**/.tsbuildinfo"
+  - --exclude="**/Makefile"
+  - --exclude="**/tsconfig*"
+  - --exclude="**/tslint.*"
+  - --exclude="**/mocha.opts"
+  - --exclude="**/.dockerignore"
+  - --exclude="**/codecov.*"
+  - --exclude="**/test/"
+  - --exclude="**/tests/"
+  - --exclude="**/.github/"
+  - --exclude="**/.circleci/"
+  - --exclude="**/.vscode/"
+  - --exclude="**/.husky/"
+  - --exclude="**/docs/"
+  - --exclude="**/doc/"
+  - --exclude="**/example/"
+  - --exclude="**/examples/"
+  - --exclude=".yarn-integrity"
+  - --exclude="**.test.js"
+  - --exclude="**.js.flow"
+  - --exclude="**.config.js"
+  - --exclude="**.txt"
+  - --exclude="**.wiki"
+  - --exclude="**.lock"
+  - --include="**.d.ts"
+  - --include="**.d.cts"
+  - --include="**.d.mts"
+  - --exclude="**.ts"
+  - --exclude="**.cts"
+  - --exclude="**.mts"
+  - --exclude="**.md~"
+  - --exclude="**.md"
+  - --exclude="**.map"
+  - --exclude="**.tsbuildinfo"
+  - --include="***"
+
+test:
+  stage: test_stage
+  environment: testing
+  variables:
+    NODE_ENV: test
+    DATABASE_DROP_SCHEMA: "true"
+  tags:
+    - ubuntu
+  script:
+    - sh ./config.sh test false
+    - ls -la
+    - cat config.test.yaml
+    - yarn install --production=false --frozen-lockfile --non-interactive
+    - NODE_ENV=test yarn test
+    - NODE_ENV=test yarn test:e2e
+
+dev_dependencies:
+  stage: dev_dependencies_stage
+  environment: development
+  tags:
+    - ubuntu
+  variables:
+    NODE_ENV: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      changes:
+        - yarn.lock
+        - package.json
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH =~ /^fix/
+      when: manual
+      changes:
+        - yarn.lock
+        - package.json
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH =~ /^feat/
+      when: manual
+      changes:
+        - yarn.lock
+        - package.json
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE != "develop" && $CI_PIPELINE_SOURCE != "main"'
+      when: manual
+      changes:
+        - yarn.lock
+        - package.json
+        - .gitlab-ci.yml
+  script:
+    - yarn install --frozen-lockfile --non-interactive
+    - rsync -rlDc --mkpath -i --del --delete-excluded
+      "./node_modules"
+      "${DEV_DEPLOY_PATH}"
+      --include="exceljs/**/doc/"
+      --exclude="**/AUTHORS"
+      --exclude="**/ChangeLog"
+      --exclude="**/CHANGES"
+      --exclude="**/README.markdown"
+      --exclude="**/README.mdown"
+      --exclude="**/readme.markdown"
+      --exclude="**/NOTICE"
+      --exclude="**/LICENSE"
+      --exclude="**/License"
+      --exclude="**/LICENSE.*"
+      --exclude="**/LICENCE"
+      --exclude="**/license"
+      --exclude="**/.babelrc"
+      --exclude="**/.editorconfig"
+      --exclude="**/.gitattributes"
+      --exclude="**/.travis*"
+      --exclude="**/.prettierrc*"
+      --exclude="**/.airtap.*"
+      --exclude="**/Gruntfile.*"
+      --exclude="**/.npmignore"
+      --exclude="**/.nvmrc"
+      --exclude="**/.eslint*"
+      --exclude="**/.nycrc*"
+      --exclude="**/.jshintrc"
+      --exclude="**/renovate.json"
+      --exclude="**/jest.*"
+      --exclude="**/bower.json"
+      --exclude="**/.taprc*"
+      --exclude="**/.commitlintrc.*"
+      --exclude="**/.release-it.json"
+      --exclude="**/nest-cli.json"
+      --exclude="**/.tsbuildinfo"
+      --exclude="**/Makefile"
+      --exclude="**/tsconfig*"
+      --exclude="**/tslint.*"
+      --exclude="**/mocha.opts"
+      --exclude="**/.dockerignore"
+      --exclude="**/codecov.*"
+      --exclude="**/test/"
+      --exclude="**/tests/"
+      --exclude="**/.github/"
+      --exclude="**/.circleci/"
+      --exclude="**/.vscode/"
+      --exclude="**/.husky/"
+      --exclude="**/docs/"
+      --exclude="**/doc/"
+      --exclude="**/example/"
+      --exclude="**/examples/"
+      --exclude=".yarn-integrity"
+      --exclude="**.test.js"
+      --exclude="**.js.flow"
+      --exclude="**.config.js"
+      --exclude="**.txt"
+      --exclude="**.wiki"
+      --exclude="**.lock"
+      --include="**.d.ts"
+      --include="**.d.cts"
+      --include="**.d.mts"
+      --exclude="**.ts"
+      --exclude="**.cts"
+      --exclude="**.mts"
+      --exclude="**.md~"
+      --exclude="**.md"
+      --exclude="**.map"
+      --exclude="**.tsbuildinfo"
+      --include="***"
+  cache:
+    <<: *cache_pull_push
+
+dev_deploy:
+  stage: dev_build_deploy_stage
+  environment: development
+  tags:
+    - ubuntu
+  cache:
+    <<: *cache_pull
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: always
+    - if: $CI_COMMIT_BRANCH =~ /^fix/
+      when: manual
+    - if: $CI_COMMIT_BRANCH =~ /^feat/
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE != "develop" && $CI_PIPELINE_SOURCE != "main"'
+      when: manual
+  variables:
+    NODE_ENV: production
+    DATABASE_DROP_SCHEMA: "false"
+  script:
+    - sh ./config.sh
+    - yarn global add @nestjs/cli@latest
+    - yarn build
+    - rsync -rlDc --mkpath -i -del
+      "./"
+      "${DEV_DEPLOY_PATH}"
+      --include="dist/***"
+      --exclude="**/*.tsbuildinfo"
+      --exclude="**/*.map"
+      --include="upload/***"
+      --include="config.yaml"
+      --include="ecosystem.config.cjs"
+      --exclude="***"
+    - cd ${DEV_DEPLOY_PATH}
+    - pm2 restart ecosystem.config.cjs
+    - pm2 reloadLogs
+    - pm2 save
+
+prod_dependencies:
+  stage: prod_dependencies_stage
+  environment: production
+  tags:
+    - ubuntu
+  variables:
+    NODE_ENV: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - yarn.lock
+        - package.json
+        - .gitlab-ci.yml
+  script:
+    - NODE_ENV=development yarn install --frozen-lockfile --non-interactive
+    - NODE_ENV=test yarn test
+    - yarn install --frozen-lockfile --non-interactive
+    - rsync -rlDc --mkpath -i --del --delete-excluded
+      "./node_modules"
+      "${PROD_DEPLOY_PATH}"
+      --include="exceljs/**/doc/"
+      --exclude="**/AUTHORS"
+      --exclude="**/ChangeLog"
+      --exclude="**/CHANGES"
+      --exclude="**/README.markdown"
+      --exclude="**/README.mdown"
+      --exclude="**/readme.markdown"
+      --exclude="**/NOTICE"
+      --exclude="**/LICENSE"
+      --exclude="**/License"
+      --exclude="**/LICENSE.*"
+      --exclude="**/LICENCE"
+      --exclude="**/license"
+      --exclude="**/.babelrc"
+      --exclude="**/.editorconfig"
+      --exclude="**/.gitattributes"
+      --exclude="**/.travis*"
+      --exclude="**/.prettierrc*"
+      --exclude="**/.airtap.*"
+      --exclude="**/Gruntfile.*"
+      --exclude="**/.npmignore"
+      --exclude="**/.nvmrc"
+      --exclude="**/.eslint*"
+      --exclude="**/.nycrc*"
+      --exclude="**/.jshintrc"
+      --exclude="**/renovate.json"
+      --exclude="**/jest.*"
+      --exclude="**/bower.json"
+      --exclude="**/.taprc*"
+      --exclude="**/.commitlintrc.*"
+      --exclude="**/.release-it.json"
+      --exclude="**/nest-cli.json"
+      --exclude="**/.tsbuildinfo"
+      --exclude="**/Makefile"
+      --exclude="**/tsconfig*"
+      --exclude="**/tslint.*"
+      --exclude="**/mocha.opts"
+      --exclude="**/.dockerignore"
+      --exclude="**/codecov.*"
+      --exclude="**/test/"
+      --exclude="**/tests/"
+      --exclude="**/.github/"
+      --exclude="**/.circleci/"
+      --exclude="**/.vscode/"
+      --exclude="**/.husky/"
+      --exclude="**/docs/"
+      --exclude="**/doc/"
+      --exclude="**/example/"
+      --exclude="**/examples/"
+      --exclude=".yarn-integrity"
+      --exclude="**.test.js"
+      --exclude="**.js.flow"
+      --exclude="**.config.js"
+      --exclude="**.txt"
+      --exclude="**.wiki"
+      --exclude="**.lock"
+      --include="**.d.ts"
+      --include="**.d.cts"
+      --include="**.d.mts"
+      --exclude="**.ts"
+      --exclude="**.cts"
+      --exclude="**.mts"
+      --exclude="**.md~"
+      --exclude="**.md"
+      --exclude="**.map"
+      --exclude="**.tsbuildinfo"
+      --include="***"
+  cache:
+    <<: *cache_pull_push
+
+prod_deploy:
+  stage: prod_build_deploy_stage
+  environment: production
+  tags:
+    - ubuntu
+  cache:
+    <<: *cache_pull
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+  variables:
+    NODE_ENV: production
+    DATABASE_DROP_SCHEMA: "false"
+  script:
+    - sh ./config.sh
+    - yarn global add @nestjs/cli@latest
+    - yarn build
+    - rsync -rlDc --mkpath -i -del
+      "./"
+      "${PROD_DEPLOY_PATH}"
+      --include="dist/***"
+      --exclude="**/*.tsbuildinfo"
+      --exclude="**/*.map"
+      --include="upload/***"
+      --include="config.yaml"
+      --include="ecosystem.config.cjs"
+      --exclude="***"
+    - cd ${PROD_DEPLOY_PATH}
+    - pm2 restart ecosystem.config.cjs
+    - pm2 reloadLogs
+    - pm2 save

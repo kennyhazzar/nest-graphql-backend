@@ -1,0 +1,79 @@
+log:
+  level: debug
+  colorize: true
+
+settings:
+  language: ru
+  locale: ru-RU
+  country: RU
+
+admin:
+  email: admin@example.com
+  password: Admin_Password1!
+
+host:
+  hostname: localhost
+  port: 3000
+  origin: http://localhost:3000
+  environment: development
+
+graphql:
+  graphiql: true
+  introspection: true
+  path: /graphql
+
+database:
+  type: postgres
+  username: postgres
+  password: 12345678
+  host: localhost
+  port: 5432
+  db: template
+  ssl: false
+  dropSchema: false
+  # If you want to use a URI instead of individual fields, uncomment the following line:
+  # uri: postgres://postgres:12345678@localhost:5432/template
+
+redis:
+  host: localhost
+  port: 6379
+  password:
+
+jwt:
+  algorithmJwt: HS256
+  algorithm: SHA512
+  access:
+    token: your-access-token-secret-here
+    expires: 15min
+  refresh:
+    token: your-refresh-token-secret-here
+    expires: 7days
+    jwtAlgorithm: HS512
+
+# Optional: Uncomment to enable email
+# mailer:
+#   host: smtp.example.com
+#   port: 465
+#   user: user@example.com
+#   pass: password
+#   from: noreply@example.com
+
+# Optional: Uncomment to enable S3 storage
+# s3:
+#   accessKey: your-access-key
+#   secretKey: your-secret-key
+#   bucket: your-bucket
+#   region: us-east-1
+#   endpoint: https://storage.example.com
+#   forcePathStyle: false
+#   signedUrlExpires: 604800 # 7 days in seconds
+
+# Optional: Uncomment to enable Graylog logging
+# graylog:
+#   host: localhost
+#   port: 12201
+#   protocol: tcp  # udp or tcp
+#   facility: backend
+#   compression: true
+#   maxChunkSize: 8192
+#   enabled: false

@@ -1,0 +1,544 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AccessTokenResponse {
+  accessToken: String!
+}
+
+type AuthResponse {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+"""Файл"""
+type File {
+  """Дата создания файла"""
+  createdAt: Timestamp
+
+  """Описание файла"""
+  description: String
+
+  """ID файла"""
+  id: ID!
+
+  """Последняя версия файла"""
+  lastVersion: FileVersion
+
+  """ID последней версии файла"""
+  lastVersionId: String
+
+  """Имя файла"""
+  name: String!
+
+  """Дата обновления файла"""
+  updatedAt: Timestamp
+
+  """Пользователь, создавший файл"""
+  user: User
+
+  """ID пользователя, создавшего файл"""
+  userId: String!
+
+  """Версии файла"""
+  versions: [FileVersion]!
+}
+
+"""Source module for file upload"""
+enum FileFrom {
+  """Public files (accessible without auth)"""
+  PUBLIC
+
+  """User files (avatars, personal documents)"""
+  USER
+}
+
+input FileLastVersionWhere {
+  """Filter AND"""
+  and: FileLastVersionWhereAnd
+
+  """Filter OR"""
+  or: FileLastVersionWhereOr
+}
+
+input FileLastVersionWhereAnd {
+  """Filter by Creation date"""
+  createdAt: SearchWhereDateInput
+
+  """Filter by exact match Unique identifier"""
+  id: String
+
+  """Filter by ILike %mimetype%"""
+  mimetype: String
+
+  """Filter by Размер файла в байтах"""
+  size: SearchWhereIntInput
+
+  """Filter by Update date"""
+  updatedAt: SearchWhereDateInput
+
+  """Filter by exact match ID пользователя, создавшего файл"""
+  userId: String
+
+  """Filter by exact match S3 версия файла"""
+  versionId: String
+}
+
+input FileLastVersionWhereOr {
+  """Filter by Creation date"""
+  createdAt: SearchWhereDateInput
+
+  """Filter by exact match Unique identifier"""
+  id: String
+
+  """Filter by ILike %mimetype%"""
+  mimetype: String
+
+  """Filter by Размер файла в байтах"""
+  size: SearchWhereIntInput
+
+  """Filter by Update date"""
+  updatedAt: SearchWhereDateInput
+
+  """Filter by exact match ID пользователя, создавшего файл"""
+  userId: String
+
+  """Filter by exact match S3 версия файла"""
+  versionId: String
+}
+
+input FileOrder {
+  """Sort by Creation date"""
+  createdAt: SearchQueryOrderDirection
+
+  """Sort by Описание файла"""
+  description: SearchQueryOrderDirection
+
+  """Sort by ID ресурса, к которому относится файл"""
+  externalId: SearchQueryOrderDirection
+
+  """Sort by Unique identifier"""
+  id: SearchQueryOrderDirection
+
+  """Sort by ID последней версии файла"""
+  lastVersionId: SearchQueryOrderDirection
+
+  """Sort by Модуль, к которому относится файл"""
+  module: SearchQueryOrderDirection
+
+  """Sort by Имя файла"""
+  name: SearchQueryOrderDirection
+
+  """Sort by Тип файла (документация, картинка, видео, и т.д.)"""
+  type: SearchQueryOrderDirection
+
+  """Sort by Update date"""
+  updatedAt: SearchQueryOrderDirection
+
+  """Sort by ID пользователя, создавшего файл"""
+  userId: SearchQueryOrderDirection
+}
+
+input FileSearch {
+  """Order for GraphQL search queries"""
+  order: FileOrder
+
+  """Pagination for GraphQL search queries"""
+  pagination: PaginationInput
+
+  """Filters applied to search"""
+  where: FileWhere
+}
+
+"""File type classification"""
+enum FileType {
+  """Document file (pdf, doc, etc.)"""
+  DOCUMENT
+
+  """Image file (jpg, png, gif, etc.)"""
+  IMAGE
+
+  """Other file type"""
+  OTHER
+
+  """User uploaded file"""
+  USER_FILE
+
+  """Video file (mp4, webm, etc.)"""
+  VIDEO
+}
+
+"""Входные данные для обновления файла"""
+input FileUpdateInput {
+  """Описание файла"""
+  description: String
+
+  """Файлы для загрузки"""
+  file: Upload
+
+  """ID файла"""
+  id: String!
+
+  """Имя файла вместе с путем"""
+  name: String
+}
+
+"""Входные данные для загрузки файла"""
+input FileUploadInput {
+  """Описание файла"""
+  description: String
+
+  """ID внешнего ресурса (пользователь ID и т.д.)"""
+  externalId: String!
+
+  """Файлы для загрузки"""
+  file: Upload!
+
+  """Из какого модуля загружается файл"""
+  module: FileFrom!
+
+  """Имя файла вместе с путем"""
+  name: String!
+
+  """Тип файла (документация, картинка, видео, и т.д.)"""
+  type: FileType!
+}
+
+"""Версии файла"""
+type FileVersion {
+  """Дата создания версии файла"""
+  createdAt: Timestamp
+
+  """ID версии файла"""
+  id: ID!
+
+  """MIME тип файла"""
+  mimetype: String!
+
+  """Размер файла в байтах"""
+  size: Int!
+
+  """Дата обновления версии файла"""
+  updatedAt: Timestamp
+
+  """Пользователь, создавший версию файла"""
+  user: User
+
+  """ID пользователя, создавшего версию файла"""
+  userId: String
+
+  """S3 версия файла"""
+  versionId: String!
+}
+
+input FileWhere {
+  """Filter AND"""
+  and: FileWhereAnd
+
+  """Filter OR"""
+  or: FileWhereOr
+}
+
+input FileWhereAnd {
+  """Filter by Creation date"""
+  createdAt: SearchWhereDateInput
+
+  """Filter by ILike %Описание файла%"""
+  description: String
+
+  """Filter by exact match ID ресурса, к которому относится файл"""
+  externalId: String
+
+  """Filter by exact match Unique identifier"""
+  id: String
+
+  """Filter by ID последней версии файла"""
+  lastVersion: FileLastVersionWhere
+
+  """Filter by exact match ID последней версии файла"""
+  lastVersionId: String
+
+  """Filter by Модуль, к которому относится файл"""
+  module: [FileFrom!]
+
+  """Filter by ILike %Имя файла%"""
+  name: String
+
+  """Filter by Тип файла (документация, картинка, видео, и т.д.)"""
+  type: [FileType!]
+
+  """Filter by Update date"""
+  updatedAt: SearchWhereDateInput
+
+  """Filter by exact match ID пользователя, создавшего файл"""
+  userId: String
+}
+
+input FileWhereOr {
+  """Filter by Creation date"""
+  createdAt: SearchWhereDateInput
+
+  """Filter by ILike %Описание файла%"""
+  description: String
+
+  """Filter by exact match ID ресурса, к которому относится файл"""
+  externalId: String
+
+  """Filter by exact match Unique identifier"""
+  id: String
+
+  """Filter by ID последней версии файла"""
+  lastVersion: FileLastVersionWhere
+
+  """Filter by exact match ID последней версии файла"""
+  lastVersionId: String
+
+  """Filter by Модуль, к которому относится файл"""
+  module: [FileFrom!]
+
+  """Filter by ILike %Имя файла%"""
+  name: String
+
+  """Filter by Тип файла (документация, картинка, видео, и т.д.)"""
+  type: [FileType!]
+
+  """Filter by Update date"""
+  updatedAt: SearchWhereDateInput
+
+  """Filter by exact match ID пользователя, создавшего файл"""
+  userId: String
+}
+
+"""Список файлов"""
+type Files {
+  """Results"""
+  nodes: [File]!
+
+  """Total count of elements"""
+  totalCount: Int!
+}
+
+"""Gender"""
+enum Gender {
+  """Female"""
+  FEMALE
+
+  """Male"""
+  MALE
+}
+
+type Mutation {
+  accessFromRefreshToken(input: RefreshTokenInput!): AccessTokenResponse!
+
+  """Удаление файла"""
+  fileDelete(
+    """ID файла"""
+    fileId: String!
+  ): Boolean!
+
+  """Обновление файла"""
+  fileUpdate(
+    """Входные данные для обновления файла"""
+    payload: FileUpdateInput!
+  ): File!
+
+  """Загрузка файлов"""
+  filesUpload(payload: [FileUploadInput!]!): Files!
+  login(input: UserLoginInput!): AuthResponse!
+  userCreate(input: UserCreateInput!): User!
+  userDelete(id: ID!): Status!
+  userRoleCreate(input: UserRoleCreateInput!): UserRole!
+  userRoleDelete(id: ID!): Status!
+  userRoleUpdate(id: ID!, input: UserRoleUpdateInput!): UserRole!
+  userUpdate(id: ID!, input: UserUpdateInput!): User!
+  userUpdateTheme(input: UserUpdateThemeInput!): User!
+}
+
+"""Pagination"""
+input PaginationInput {
+  """Offset (paginated) where from entities should be taken"""
+  skip: Int = 0
+
+  """Limit (paginated) - max number of entities should be taken"""
+  take: Int = 5
+}
+
+type Query {
+  """Получение списка файлов"""
+  files(
+    """Поисковый запрос для файлов"""
+    payload: FileSearch
+  ): Files!
+  user: User!
+  userGetById(id: ID!): User!
+  userRoleGetById(id: ID!): UserRole!
+  userRoles: UserRoles!
+  users: Users!
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
+}
+
+"""User role types"""
+enum RoleType {
+  """System administrator with full access"""
+  ADMIN
+
+  """Content moderator with limited admin access"""
+  MODERATOR
+
+  """Public/unauthenticated access"""
+  PUBLIC
+
+  """Regular authenticated user"""
+  USER
+}
+
+"""Order for GraphQL search queries"""
+enum SearchQueryOrderDirection {
+  """Ascending"""
+  ASC
+
+  """Descending"""
+  DESC
+}
+
+"""Date filter"""
+input SearchWhereDateInput {
+  """Start date"""
+  from: Timestamp
+
+  """End date"""
+  to: Timestamp
+}
+
+"""Integer filter"""
+input SearchWhereIntInput {
+  """Maximum value"""
+  max: Int
+
+  """Minimum value"""
+  min: Int
+}
+
+"""Operation status"""
+enum Status {
+  """Error"""
+  ERROR
+
+  """Success"""
+  OK
+}
+
+"""User interface theme"""
+enum Theme {
+  """Auto theme"""
+  AUTO
+
+  """Dark theme"""
+  DARK
+
+  """Light theme"""
+  LIGHT
+
+  """System theme"""
+  SYSTEM
+}
+
+"""Timestamp custom scalar type - handles Date objects and ISO strings"""
+scalar Timestamp
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type User {
+  birthday: Timestamp
+  blocked: Boolean!
+  country: String!
+  createdAt: Timestamp
+  email: String!
+  gender: Gender!
+  id: ID!
+  language: String!
+  locale: String!
+  middleName: String
+  name: String!
+  phone: String
+  role: UserRole
+  surname: String!
+  theme: Theme!
+  updatedAt: Timestamp
+  verified: Boolean!
+}
+
+input UserCreateInput {
+  birthday: Timestamp
+  email: String!
+  gender: Gender
+  middleName: String
+  name: String!
+  password: String!
+  phone: String
+  roleId: ID!
+  surname: String!
+}
+
+input UserLoginInput {
+  email: String!
+  password: String!
+}
+
+type UserRole {
+  createdAt: Timestamp
+  description: String
+  id: ID!
+  name: String!
+  type: RoleType!
+  updatedAt: Timestamp
+}
+
+input UserRoleCreateInput {
+  description: String
+  name: String!
+  type: RoleType!
+}
+
+input UserRoleUpdateInput {
+  description: String
+  name: String
+  type: RoleType
+}
+
+type UserRoles {
+  """Results"""
+  nodes: [UserRole]!
+
+  """Total count of elements"""
+  totalCount: Int!
+}
+
+input UserUpdateInput {
+  birthday: Timestamp
+  blocked: Boolean
+  email: String
+  gender: Gender
+  middleName: String
+  name: String
+  phone: String
+  roleId: ID
+  surname: String
+}
+
+input UserUpdateThemeInput {
+  theme: Theme!
+}
+
+type Users {
+  """Results"""
+  nodes: [User]!
+
+  """Total count of elements"""
+  totalCount: Int!
+}

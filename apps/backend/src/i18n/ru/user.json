@@ -1,0 +1,29 @@
+{
+  "auth": {
+    "password_mismatched": "Пароль неправильный",
+    "verified": "Вы должны подтвердить ваш email",
+    "invalidJwtPayload": "Некорректный JWT payload",
+    "invalidCredentials": "Неверные учетные данные",
+    "invalidVerify": "Неверный токен подтверждения",
+    "blocked": "Пользователь заблокирован",
+    "incorrectEmail": "Неверный email",
+    "userIdOrEmailMustBeProvided": "ИД пользователя или email должны быть предоставлены"
+  },
+  "role": {
+    "notFound": "Роль не найдена",
+    "failedToSave": "Не удалось сохранить роль",
+    "failedToUpdate": "Не удалось обновить роль"
+  },
+  "avatar": {
+    "failedToSave": "Не удалось сохранить аватар",
+    "failedToUpdate": "Не удалось обновить аватар"
+  },
+  "email": {
+    "alreadyExists": "Email уже существует"
+  },
+  "unknownError": "Неизвестная ошибка",
+  "notSufficientPermissions": "Недостаточно прав",
+  "notFound": "Не найден пользователь",
+  "failedToSave": "Не удалось сохранить пользователя",
+  "failedToUpdate": "Не удалось обновить пользователя"
+}
