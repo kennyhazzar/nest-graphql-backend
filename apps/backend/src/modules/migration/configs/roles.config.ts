@@ -68,6 +68,11 @@ export const rolePermissionsConfig: RoleConfig[] = [
       { action: Actions.CREATE, subject: Subjects.FILE, description: 'Upload own files' },
       { action: Actions.UPDATE, subject: Subjects.FILE, description: 'Update own files' },
       { action: Actions.DELETE, subject: Subjects.FILE, description: 'Delete own files' },
+
+      // Notifications
+      { action: Actions.READ, subject: Subjects.NOTIFICATION, description: 'View own notifications' },
+      { action: Actions.UPDATE, subject: Subjects.NOTIFICATION, description: 'Update own notifications' },
+      { action: Actions.DELETE, subject: Subjects.NOTIFICATION, description: 'Delete own notifications' },
     ],
   },
 
@@ -91,6 +96,11 @@ export const rolePermissionsConfig: RoleConfig[] = [
       { action: Actions.CREATE, subject: Subjects.FILE, description: 'Upload files' },
       { action: Actions.UPDATE, subject: Subjects.FILE, description: 'Update files' },
       { action: Actions.DELETE, subject: Subjects.FILE, description: 'Delete files' },
+
+      // Notifications
+      { action: Actions.READ, subject: Subjects.NOTIFICATION, description: 'View own notifications' },
+      { action: Actions.UPDATE, subject: Subjects.NOTIFICATION, description: 'Update own notifications' },
+      { action: Actions.DELETE, subject: Subjects.NOTIFICATION, description: 'Delete own notifications' },
     ],
   },
 
@@ -110,6 +120,11 @@ export const rolePermissionsConfig: RoleConfig[] = [
       { action: Actions.CREATE, subject: Subjects.FILE, description: 'Upload files' },
       { action: Actions.UPDATE, subject: Subjects.FILE, description: 'Update own files' },
       { action: Actions.DELETE, subject: Subjects.FILE, description: 'Delete own files' },
+
+      // Notifications
+      { action: Actions.READ, subject: Subjects.NOTIFICATION, description: 'View own notifications' },
+      { action: Actions.UPDATE, subject: Subjects.NOTIFICATION, description: 'Update own notifications' },
+      { action: Actions.DELETE, subject: Subjects.NOTIFICATION, description: 'Delete own notifications' },
     ],
   },
 

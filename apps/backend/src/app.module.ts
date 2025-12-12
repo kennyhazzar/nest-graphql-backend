@@ -18,6 +18,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthServiceAdapter } from './modules/users/infrastructure/adapters';
 import { MigrationModule } from './modules/migration/migration.module';
 import { FileModule } from './modules/file/file.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { TimestampScalar } from './common/scalars/timestamp.scalar';
 
 const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : 'config.yaml';
@@ -37,6 +38,8 @@ const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : '
     UsersModule,
 
     FileModule,
+
+    NotificationModule,
 
     MigrationModule,
 

@@ -7,3 +7,4 @@ export * from './gender.enum';
 export * from './search-query-order-direction.enum';
 export * from './file-type.enum';
 export * from './file-from.enum';
+export * from './notification-type.enum';

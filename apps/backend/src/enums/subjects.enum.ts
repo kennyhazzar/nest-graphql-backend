@@ -13,6 +13,9 @@ export enum Subjects {
   // File management subjects
   FILE = 'File',
   FILE_ADMIN = 'FileAdmin',
+
+  // Notification subjects
+  NOTIFICATION = 'Notification',
 }
 
 registerEnumType(Subjects, {
@@ -24,5 +27,6 @@ registerEnumType(Subjects, {
     USER_ROLE: { description: 'Role management' },
     FILE: { description: 'Own file operations' },
     FILE_ADMIN: { description: 'File administration' },
+    NOTIFICATION: { description: 'Own notifications' },
   },
 });
