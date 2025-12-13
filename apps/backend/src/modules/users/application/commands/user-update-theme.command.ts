@@ -1,9 +1,13 @@
-import { IdType } from '@/interfaces/id.type';
-import { UserUpdateThemeInput } from '../../presentation/dtos';
+import { Command } from '@nestjs/cqrs';
 
-export class UserUpdateThemeCommand {
+import { IdType } from '@/interfaces/id.type';
+import { UserDto, UserUpdateThemeInput } from '../../presentation/dtos';
+
+export class UserUpdateThemeCommand extends Command<UserDto> {
   constructor(
     public readonly userId: IdType,
     public readonly payload: UserUpdateThemeInput,
-  ) {}
+  ) {
+    super();
+  }
 }

@@ -1,5 +1,9 @@
-import { UserRoleCreateInput } from '../../presentation/dtos';
+import { Command } from '@nestjs/cqrs';
 
-export class UserRoleCreateCommand {
-  constructor(public readonly payload: UserRoleCreateInput) {}
+import { UserRoleCreateInput, UserRoleDto } from '../../presentation/dtos';
+
+export class UserRoleCreateCommand extends Command<UserRoleDto> {
+  constructor(public readonly payload: UserRoleCreateInput) {
+    super();
+  }
 }

@@ -1,9 +1,13 @@
-import { IdType } from '@/interfaces/id.type';
-import { UserRoleUpdateInput } from '../../presentation/dtos';
+import { Command } from '@nestjs/cqrs';
 
-export class UserRoleUpdateCommand {
+import { IdType } from '@/interfaces/id.type';
+import { UserRoleDto, UserRoleUpdateInput } from '../../presentation/dtos';
+
+export class UserRoleUpdateCommand extends Command<UserRoleDto> {
   constructor(
     public readonly roleId: IdType,
     public readonly payload: UserRoleUpdateInput,
-  ) {}
+  ) {
+    super();
+  }
 }

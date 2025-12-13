@@ -1,5 +1,10 @@
-import { IdType } from '@/interfaces/id.type';
+import { Query } from '@nestjs/cqrs';
 
-export class UserGetByIdQuery {
-  constructor(public readonly userId: IdType) {}
+import { IdType } from '@/interfaces/id.type';
+import { UserDto } from '../../presentation/dtos';
+
+export class UserGetByIdQuery extends Query<UserDto> {
+  constructor(public readonly userId: IdType) {
+    super();
+  }
 }
