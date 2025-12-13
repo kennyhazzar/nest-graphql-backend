@@ -346,6 +346,15 @@ type Mutation {
   """Загрузка файлов"""
   filesUpload(payload: [FileUploadInput!]!): Files!
   login(input: UserLoginInput!): AuthResponse!
+
+  """Delete notification"""
+  notificationDelete(id: ID!): Boolean!
+
+  """Mark all notifications as read, returns count of updated"""
+  notificationMarkAllRead: Int!
+
+  """Mark notification as read"""
+  notificationMarkRead(id: ID!): Boolean!
   userCreate(input: UserCreateInput!): User!
   userDelete(id: ID!): Status!
   userRoleCreate(input: UserRoleCreateInput!): UserRole!
@@ -353,6 +362,44 @@ type Mutation {
   userRoleUpdate(id: ID!, input: UserRoleUpdateInput!): UserRole!
   userUpdate(id: ID!, input: UserUpdateInput!): User!
   userUpdateTheme(input: UserUpdateThemeInput!): User!
+}
+
+type Notification {
+  content: String!
+  createdAt: Timestamp!
+  id: ID!
+  isRead: Boolean!
+
+  """JSON string with additional metadata"""
+  metadata: String
+  title: String!
+  type: NotificationType!
+  userId: ID!
+}
+
+input NotificationFilterInput {
+  isRead: Boolean
+  skip: Int = 0
+  take: Int = 20
+  type: NotificationType
+}
+
+"""Тип уведомления"""
+enum NotificationType {
+  ERROR
+  INFO
+  SUCCESS
+  SYSTEM
+  WARNING
+}
+
+type Notifications {
+  """Results"""
+  nodes: [Notification]!
+
+  """Total count of elements"""
+  totalCount: Int!
+  unreadCount: Int!
 }
 
 """Pagination"""
@@ -370,6 +417,12 @@ type Query {
     """Поисковый запрос для файлов"""
     payload: FileSearch
   ): Files!
+
+  """Get unread notifications count"""
+  notificationUnreadCount: Int!
+
+  """Get notifications for current user"""
+  notifications(input: NotificationFilterInput): Notifications!
   user: User!
   userGetById(id: ID!): User!
   userRoleGetById(id: ID!): UserRole!
@@ -430,6 +483,11 @@ enum Status {
 
   """Success"""
   OK
+}
+
+type Subscription {
+  """Subscribe to new notifications for current user"""
+  onNotification: Notification!
 }
 
 """User interface theme"""

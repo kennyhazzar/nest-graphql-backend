@@ -7,6 +7,7 @@ import { GraphqlSubscriptionsPubsubFactory } from '@/factories/graphql-subscript
 
 // Infrastructure
 import { NotificationEntity } from './infrastructure/entity/notification.entity';
+import { NotificationTemplateEntity } from './infrastructure/entity/notification-template.entity';
 import { NotificationRepositoryImpl } from './infrastructure/repositories/notification-repository.impl';
 import { NotificationPubSubService } from './infrastructure/services/notification-pubsub.service';
 
@@ -34,7 +35,7 @@ const CommandHandlers = [
 const QueryHandlers = [NotificationsGetHandler, NotificationUnreadCountHandler];
 
 @Module({
-  imports: [CqrsModule, TypeOrmModule.forFeature([NotificationEntity])],
+  imports: [CqrsModule, TypeOrmModule.forFeature([NotificationEntity, NotificationTemplateEntity])],
   providers: [
     NotificationResolver,
     NotificationPubSubService,
