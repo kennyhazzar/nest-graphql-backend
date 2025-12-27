@@ -1,4 +1,3 @@
-import { AuthServiceAdapter } from '../../infrastructure/adapters/auth-service.adapter';
 import { UserEntity } from '../../infrastructure/entity';
 
 /**
@@ -6,16 +5,13 @@ import { UserEntity } from '../../infrastructure/entity';
  */
 export class User extends UserEntity {
   /**
-   * Factory method to create a new user with hashed password
+   * Factory method to create a new user
+   * @param data - User data (password must be already hashed by caller)
    */
   static create(data: Partial<UserEntity>): User {
     const user = new User();
     Object.assign(user, data);
-
-    if (data.password) {
-      user.password = AuthServiceAdapter.hashPassword(data.password);
-    }
-
+    // Password should be already hashed by calling code using PasswordService
     return user;
   }
 }

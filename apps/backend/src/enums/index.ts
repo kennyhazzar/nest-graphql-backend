@@ -8,3 +8,4 @@ export * from './search-query-order-direction.enum';
 export * from './file-type.enum';
 export * from './file-from.enum';
 export * from './notification-type.enum';
+export * from './password-hash-type.enum';

@@ -9,9 +9,11 @@ import { PassportModule } from '@nestjs/passport';
 import { CaslAbilityFactory } from '../../factories/casl-ability.factory';
 import { UserEntity, RefreshEntity, UserRoleEntity, RolePermissionEntity } from './infrastructure/entity';
 import { UserRepository, RolePermissionRepository, UserRoleRepository } from './domain/repositories';
+import { PasswordService } from './domain/services/password.service';
 import { UserRepositoryImpl, RolePermissionRepositoryImpl, UserRoleRepositoryImpl } from './infrastructure/repositories';
 import { UserResolver, UserRoleResolver } from './presentation/resolvers';
 import { AuthServiceAdapter } from './infrastructure/adapters/auth-service.adapter';
+import { PasswordServiceAdapter } from './infrastructure/adapters/password-service.adapter';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { PoliciesService } from './infrastructure/services/policies.service';
 import {
@@ -100,10 +102,15 @@ const QueryHandlers = [
       provide: RolePermissionRepository,
       useClass: RolePermissionRepositoryImpl,
     },
+    {
+      provide: PasswordService,
+      useClass: PasswordServiceAdapter,
+    },
   ],
   exports: [
     UserRepository,
     AuthServiceAdapter,
+    PasswordService,
     PoliciesService,
     CaslAbilityFactory,
     UserRoleRepository,

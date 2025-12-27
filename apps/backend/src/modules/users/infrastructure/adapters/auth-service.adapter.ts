@@ -135,11 +135,21 @@ export class AuthServiceAdapter {
     }
   }
 
+  /**
+   * @deprecated Use PasswordService.verifyPassword() instead.
+   * This method uses insecure HMAC-SHA256 and will be removed in future versions.
+   * @see PasswordService
+   */
   static validateCredentials(passwordToCheck: string, password: string): boolean {
     const hashedPassword = AuthServiceAdapter.hashPassword(password);
     return hashedPassword === passwordToCheck;
   }
 
+  /**
+   * @deprecated Use PasswordService.hashPassword() instead.
+   * This method uses insecure HMAC-SHA256 and will be removed in future versions.
+   * @see PasswordService
+   */
   static hashPassword(password: string): string {
     const hmac = createHmac(AuthServiceAdapter.algorithm, AuthServiceAdapter.accessToken);
     hmac.update(password.normalize());

@@ -6,7 +6,8 @@ import { EntityManager } from 'typeorm';
 
 import { RoleType } from '@/enums';
 import { IdType } from '@/interfaces/id.type';
-import { UserEntity, AuthServiceAdapter } from '../users/infrastructure';
+import { UserEntity } from '../users/infrastructure';
+import { PasswordService } from '../users/domain/services/password.service';
 import { RolesSeedService } from './roles-seed.service';
 import { UserRepository, UserRoleRepository } from '../users/domain/repositories';
 
@@ -19,6 +20,7 @@ export class UserSeedService {
     private readonly userRepository: UserRepository,
     private readonly userRoleRepository: UserRoleRepository,
     private readonly rolesSeedService: RolesSeedService,
+    private readonly passwordService: PasswordService,
     @InjectEntityManager()
     private readonly entityManager: EntityManager,
   ) {}
@@ -67,12 +69,16 @@ export class UserSeedService {
         if (!roleAdmin) {
           throw new Error('Role for admin user not found');
         }
+
+        // Hash password using Argon2id
+        const hashedPassword = await this.passwordService.hashPassword(password);
+
         // Create admin user
         const { identifiers } = await tran.upsert(
           UserEntity,
           {
             email: this.configService.getOrThrow<string>('admin.email'),
-            password: AuthServiceAdapter.hashPassword(password),
+            password: hashedPassword,
             role: roleAdmin,
             surname: 'Super',
             name: 'Admin',
