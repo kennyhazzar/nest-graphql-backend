@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join as pathJoin } from 'node:path';
 import * as yaml from 'js-yaml';
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { ConfigFactory, ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLWebsocketResolver, I18nModule, I18nOptionsWithoutResolvers } from 'nestjs-i18n';
@@ -9,8 +10,16 @@ import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { GraphqlThrottlerGuard } from './guards/graphql-throttler.guard';
 
-import { LoggerModuleOptions, GraphQLModuleOptions, TypeOrmDbModuleOptions, BullmqModuleOptions } from './options';
+import {
+  LoggerModuleOptions,
+  GraphQLModuleOptions,
+  TypeOrmDbModuleOptions,
+  BullmqModuleOptions,
+  ThrottlerOptions,
+} from './options';
 
 import { GraphqlSearchQueryModule } from './common/graphql-search-query';
 import { UserLanguageResolver } from './i18n/user-language-resolver';
@@ -19,6 +28,7 @@ import { AuthServiceAdapter } from './modules/users/infrastructure/adapters';
 import { MigrationModule } from './modules/migration/migration.module';
 import { FileModule } from './modules/file/file.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { HealthModule } from './modules/health/health.module';
 import { TimestampScalar } from './common/scalars/timestamp.scalar';
 
 const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : 'config.yaml';
@@ -35,11 +45,15 @@ const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : '
 
     BullModule.forRootAsync({ useFactory: BullmqModuleOptions, inject: [ConfigService] }),
 
+    ThrottlerModule.forRootAsync({ useFactory: ThrottlerOptions, inject: [ConfigService] }),
+
     UsersModule,
 
     FileModule,
 
     NotificationModule,
+
+    HealthModule,
 
     MigrationModule,
 
@@ -69,6 +83,12 @@ const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : '
 
     GraphqlSearchQueryModule,
   ],
-  providers: [TimestampScalar],
+  providers: [
+    TimestampScalar,
+    {
+      provide: APP_GUARD,
+      useClass: GraphqlThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

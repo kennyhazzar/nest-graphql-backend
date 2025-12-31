@@ -16,6 +16,8 @@ void (async () => {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
+      // Trust proxy headers for correct IP detection behind load balancers
+      trustProxy: true,
       // Increase request timeout for file uploads
       requestTimeout: 300000, // 5 minutes
       bodyLimit: 1024 * 1024 * 50, // 50MB body limit
@@ -34,16 +36,27 @@ void (async () => {
   const configService = app.get(ConfigService);
   const environment = configService.getOrThrow('host.environment');
 
+  // Setup origin for CORS and CSP
   const origin: string[] = [configService.getOrThrow('host.origin')];
   if (environment !== 'production') {
     origin.push('http://localhost:8080');
   }
-  app.enableCors({
-    origin,
-    credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+
+  // CORS configuration
+  const corsEnabled = configService.get<boolean>('cors.enabled', true);
+  if (corsEnabled) {
+    app.enableCors({
+      origin,
+      credentials: configService.get<boolean>('cors.credentials', true),
+      methods: configService.get<string[]>('cors.methods', ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']),
+      allowedHeaders: configService.get<string[]>('cors.allowedHeaders', [
+        'Content-Type',
+        'Authorization',
+        'Accept',
+        'X-Requested-With',
+      ]),
+    });
+  }
 
   const defaultSrc: string[] = [`'self'`];
   const styleSrc: string[] = [`'self'`, `'unsafe-inline'`];
