@@ -9,8 +9,27 @@ import { JwtPayloadApp, ValidateJWT } from '@/interfaces/jwt.payload.interface';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
     const secretOrKey = configService.getOrThrow<string>('jwt.access.token');
+    const cookieName = configService.get<string>('auth.cookies.accessToken.name', 'accessToken');
+
+    // Create custom extractor that tries header first, then cookie
+    const extractFromHeader = ExtractJwt.fromAuthHeaderAsBearerToken();
+    const extractFromCookie = (req: any) => {
+      if (req && req.cookies && req.cookies[cookieName]) {
+        return req.cookies[cookieName];
+      }
+      return null;
+    };
+
+    const jwtExtractor = (req: any) => {
+      let token = extractFromHeader(req);
+      if (!token) {
+        token = extractFromCookie(req);
+      }
+      return token;
+    };
+
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: jwtExtractor,
       ignoreExpiration: false,
       secretOrKey,
     });

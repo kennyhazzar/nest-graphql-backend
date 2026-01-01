@@ -15,6 +15,11 @@ export type I18nTranslations = {
             "blocked": string;
             "incorrectEmail": string;
             "userIdOrEmailMustBeProvided": string;
+            "logout": {
+                "success": string;
+                "failed": string;
+                "tokenNotProvided": string;
+            };
         };
         "role": {
             "notFound": string;

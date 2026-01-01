@@ -1,16 +1,20 @@
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { Args, Context, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ConfigService } from '@nestjs/config';
+import { I18nService } from 'nestjs-i18n';
 
 import { IdType } from '@/interfaces/id.type';
 import { Actions } from '@/enums/actions.enum';
 import { Subjects } from '@/enums/subjects.enum';
 import { Status } from '@/enums/status.enum';
+import { AuthMode } from '@/enums';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { PoliciesGuard } from '@/guards/policies.guard';
 import { CurrentUserId } from '@/decorators/current-user-id.decorator';
 import { Policy } from '@/decorators/policy.decorator';
 import { GraphQLContext } from '@/interfaces/graphql-context.interface';
+import { I18nTranslations } from '@/i18n';
 import { AuthServiceAdapter } from '../../infrastructure/adapters';
 import {
   UserDto,
@@ -22,10 +26,12 @@ import {
   RefreshTokenInput,
   AuthResponseDto,
   AccessTokenResponseDto,
+  LogoutResponseDto,
 } from '../dtos';
 import { UserMapper } from '../mappers';
 import {
   UserLoginCommand,
+  UserLogoutCommand,
   UserCreateCommand,
   UserUpdateCommand,
   UserDeleteCommand,
@@ -40,6 +46,8 @@ export class UserResolver {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly authService: AuthServiceAdapter,
+    private readonly i18n: I18nService<I18nTranslations>,
+    private readonly configService: ConfigService,
   ) {}
 
   // Auth mutations
@@ -56,22 +64,89 @@ export class UserResolver {
       language: user.language,
     });
     const refreshToken = await this.authService.generateRefreshToken(user, ctx.req!);
+    const csrfToken = this.authService.generateCsrfToken();
+
+    // Set cookies
+    this.authService.setAuthCookies(ctx.reply!, accessToken, refreshToken, csrfToken);
+
+    // Determine response mode
+    const mode = this.configService.get<AuthMode>('auth.mode', AuthMode.HYBRID);
+    const csrfEnabled = this.configService.get<boolean>('auth.csrf.enabled', false);
 
     return {
-      accessToken,
-      refreshToken,
+      accessToken: mode !== AuthMode.COOKIES_ONLY ? accessToken : undefined,
+      refreshToken: mode !== AuthMode.COOKIES_ONLY ? refreshToken : undefined,
+      csrfToken: csrfEnabled && mode !== AuthMode.COOKIES_ONLY ? csrfToken : undefined,
       user: UserMapper.toDto(user),
     };
   }
 
   @Mutation(() => AccessTokenResponseDto)
   async accessFromRefreshToken(
-    @Args('input') input: RefreshTokenInput,
+    @Args('input', { nullable: true, type: () => RefreshTokenInput }) input: RefreshTokenInput | null,
+    @Context() ctx: GraphQLContext,
   ): Promise<AccessTokenResponseDto> {
+    // Try to get refresh token from cookie or from input
+    const refreshToken = ctx.req?.cookies?.refreshToken || input?.refreshToken;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token not provided');
+    }
+
     const accessToken = await this.commandBus.execute(
-      new AccessFromRefreshTokenCommand(input.refreshToken),
+      new AccessFromRefreshTokenCommand(refreshToken),
     );
-    return { accessToken };
+
+    // Update accessToken cookie
+    const mode = this.configService.get<AuthMode>('auth.mode', AuthMode.HYBRID);
+    if (mode !== AuthMode.RESPONSE_ONLY) {
+      const accessCookieConfig = {
+        httpOnly: this.configService.get<boolean>('auth.cookies.accessToken.httpOnly', true),
+        secure: this.configService.get<boolean>('auth.cookies.accessToken.secure', true),
+        sameSite: this.configService.get<'strict' | 'lax' | 'none'>(
+          'auth.cookies.accessToken.sameSite',
+          'lax',
+        ),
+        maxAge: this.configService.get<number>('auth.cookies.accessToken.maxAge', 900000),
+      };
+      ctx.reply!.setCookie(
+        this.configService.get<string>('auth.cookies.accessToken.name', 'accessToken'),
+        accessToken,
+        accessCookieConfig,
+      );
+    }
+
+    return {
+      accessToken: mode !== AuthMode.COOKIES_ONLY ? accessToken : undefined,
+    };
+  }
+
+  @Mutation(() => LogoutResponseDto)
+  async logout(
+    @Args('input') input: RefreshTokenInput,
+    @Context() ctx: GraphQLContext,
+  ): Promise<LogoutResponseDto> {
+    // Try to get refresh token from cookie or from input
+    const refreshToken = ctx.req?.cookies?.refreshToken || input.refreshToken;
+
+    if (!refreshToken) {
+      return {
+        success: false,
+        message: await this.i18n.translate('user.auth.logout.tokenNotProvided'),
+      };
+    }
+
+    const success = await this.commandBus.execute(new UserLogoutCommand(refreshToken));
+
+    // Clear cookies
+    this.authService.clearAuthCookies(ctx.reply!);
+
+    return {
+      success,
+      message: success
+        ? await this.i18n.translate('user.auth.logout.success')
+        : await this.i18n.translate('user.auth.logout.failed'),
+    };
   }
 
   // User queries

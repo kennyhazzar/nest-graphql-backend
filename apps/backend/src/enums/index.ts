@@ -1,4 +1,5 @@
 export * from './actions.enum';
+export * from './auth-mode.enum';
 export * from './role-type.enum';
 export * from './subjects.enum';
 export * from './status.enum';

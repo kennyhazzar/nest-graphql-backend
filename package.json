@@ -45,6 +45,7 @@
     "@aws-sdk/lib-storage": "^3.896.0",
     "@casl/ability": "^6.7.3",
     "@elastic/elasticsearch": "^9.1.1",
+    "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.1",
     "@fastify/static": "^8.2.0",

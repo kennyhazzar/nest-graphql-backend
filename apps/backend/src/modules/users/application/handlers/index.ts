@@ -1,5 +1,6 @@
 export * from './user-login.handler';
 export * from './access-from-refresh-token.handler';
+export * from './user-logout.handler';
 export * from './user-create.handler';
 export * from './user-update.handler';
 export * from './user-delete.handler';

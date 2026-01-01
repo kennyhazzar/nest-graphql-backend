@@ -50,6 +50,43 @@ jwt:
     expires: 7days
     jwtAlgorithm: HS512
 
+# Authentication configuration
+auth:
+  # Authentication mode:
+  # - HYBRID: tokens in both cookies AND response body (recommended for flexibility)
+  # - COOKIES_ONLY: tokens only in httpOnly cookies (maximum security, web only)
+  # - RESPONSE_ONLY: tokens only in response body (for mobile apps, current behavior)
+  mode: HYBRID
+
+  csrf:
+    # Enable CSRF protection (double-submit cookie pattern)
+    # Recommended: true for web applications
+    # Note: GraphiQL requests are automatically exempted in non-production environments
+    # even when CSRF is enabled, so you can test mutations locally without CSRF tokens
+    enabled: true
+
+  cookies:
+    accessToken:
+      name: accessToken
+      httpOnly: true                    # Prevent JavaScript access (XSS protection)
+      secure: false                     # Set to true in production (HTTPS only)
+      sameSite: lax                     # CSRF protection: strict | lax | none
+      maxAge: 900000                    # 15 minutes (900000ms) - matches JWT expires
+
+    refreshToken:
+      name: refreshToken
+      httpOnly: true                    # Prevent JavaScript access (XSS protection)
+      secure: false                     # Set to true in production (HTTPS only)
+      sameSite: lax                     # CSRF protection: strict | lax | none
+      maxAge: 604800000                 # 7 days (604800000ms)
+
+    csrf:
+      name: csrf-token
+      httpOnly: false                   # Must be readable by JavaScript for CSRF header
+      secure: false                     # Set to true in production (HTTPS only)
+      sameSite: lax                     # CSRF protection: strict | lax | none
+      maxAge: 604800000                 # 7 days (604800000ms)
+
 # Optional: Uncomment to enable email
 # mailer:
 #   host: smtp.example.com

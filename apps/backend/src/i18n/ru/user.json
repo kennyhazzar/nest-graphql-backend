@@ -7,7 +7,12 @@
     "invalidVerify": "Неверный токен подтверждения",
     "blocked": "Пользователь заблокирован",
     "incorrectEmail": "Неверный email",
-    "userIdOrEmailMustBeProvided": "ИД пользователя или email должны быть предоставлены"
+    "userIdOrEmailMustBeProvided": "ИД пользователя или email должны быть предоставлены",
+    "logout": {
+      "success": "Успешный выход из системы",
+      "failed": "Не удалось выйти или токен уже был отозван",
+      "tokenNotProvided": "Refresh токен не предоставлен"
+    }
   },
   "role": {
     "notFound": "Роль не найдена",
