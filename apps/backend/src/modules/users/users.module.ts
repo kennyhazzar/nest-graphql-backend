@@ -18,6 +18,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { PoliciesService } from './infrastructure/services/policies.service';
 import {
   LoginUserHandler,
+  UserLogoutHandler,
   AccessFromRefreshTokenHandler,
   UserCreateHandler,
   UserUpdateHandler,
@@ -39,6 +40,7 @@ import {
  */
 const CommandHandlers = [
   LoginUserHandler,
+  UserLogoutHandler,
   AccessFromRefreshTokenHandler,
   UserCreateHandler,
   UserUpdateHandler,

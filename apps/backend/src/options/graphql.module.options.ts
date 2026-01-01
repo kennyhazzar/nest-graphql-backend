@@ -65,10 +65,21 @@ export const GraphQLModuleOptions = (
       },
     },
     context: async (req: FastifyRequest, reply: FastifyReply): Promise<GraphQLContext> => {
-      const token = req.headers.authorization?.slice(7);
+      // Try to extract token from Authorization header first
+      let token = req.headers.authorization?.slice(7);
+
+      // If not in header, try to get from cookie
+      if (!token) {
+        const cookieName = configService.get<string>('auth.cookies.accessToken.name', 'accessToken');
+        token = (req.cookies as Record<string, string> | undefined)?.[cookieName];
+      }
+
+      // If no token found at all, return context without credentials
       if (!token) {
         return { req, reply };
       }
+
+      // Validate token and add credentials to context
       const credentials = await authService.validateJwt(token, undefined, req);
       return { ...credentials, req, reply };
     },

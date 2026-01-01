@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ExecutionContext } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { I18nService } from 'nestjs-i18n';
 import { UserResolver } from './user.resolver';
 import { AuthServiceAdapter } from '../../infrastructure/adapters';
 import { UserLoginInput, UserCreateInput, AuthResponseDto, UserDto } from '../dtos';
@@ -28,6 +30,18 @@ describe('UserResolver (Integration)', () => {
       generateAccessToken: jest.fn(),
       generateRefreshToken: jest.fn(),
       verifyRefreshToken: jest.fn(),
+      generateCsrfToken: jest.fn().mockReturnValue('mock-csrf-token'),
+      setAuthCookies: jest.fn(),
+      clearAuthCookies: jest.fn(),
+    };
+
+    const mockI18nService = {
+      translate: jest.fn().mockImplementation((key: string) => Promise.resolve(key)),
+    };
+
+    const mockConfigService = {
+      get: jest.fn().mockReturnValue('HYBRID'),
+      getOrThrow: jest.fn(),
     };
 
     const mockJwtAuthGuard = {
@@ -52,6 +66,14 @@ describe('UserResolver (Integration)', () => {
         {
           provide: AuthServiceAdapter,
           useValue: mockAuthService,
+        },
+        {
+          provide: I18nService,
+          useValue: mockI18nService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     })
@@ -103,6 +125,9 @@ describe('UserResolver (Integration)', () => {
 
       const mockContext = {
         req: {},
+        reply: {
+          setCookie: jest.fn(),
+        },
       };
 
       commandBus.execute.mockResolvedValue(mockUser);
@@ -116,9 +141,17 @@ describe('UserResolver (Integration)', () => {
       expect(commandBus.execute).toHaveBeenCalledWith(new UserLoginCommand(loginInput));
       expect(authService.generateAccessToken).toHaveBeenCalled();
       expect(authService.generateRefreshToken).toHaveBeenCalledWith(mockUser, mockContext.req);
+      expect(authService.generateCsrfToken).toHaveBeenCalled();
+      expect(authService.setAuthCookies).toHaveBeenCalledWith(
+        mockContext.reply,
+        mockAccessToken,
+        mockRefreshToken,
+        'mock-csrf-token',
+      );
       expect(result).toEqual({
         accessToken: mockAccessToken,
         refreshToken: mockRefreshToken,
+        csrfToken: 'mock-csrf-token',
         user: mockUser,
       } satisfies AuthResponseDto);
     });
@@ -155,6 +188,9 @@ describe('UserResolver (Integration)', () => {
 
       const mockContext = {
         req: {},
+        reply: {
+          setCookie: jest.fn(),
+        },
       };
 
       // Act

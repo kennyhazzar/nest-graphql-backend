@@ -2,7 +2,7 @@ import { createHmac } from 'node:crypto';
 import { Algorithm } from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 import * as ms from 'ms';
-import { FastifyRequest } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { ConfigService } from '@nestjs/config';
@@ -11,6 +11,7 @@ import { DeepPartial, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { ValidateJWT, JWT_BASE_OPTIONS, JwtPayloadApp } from '@/interfaces/jwt.payload.interface';
+import { AuthMode } from '@/enums';
 import { UserRepository } from '@/modules/users/domain/repositories/user.repository';
 import { RefreshEntity, UserEntity } from '../entity';
 
@@ -133,6 +134,132 @@ export class AuthServiceAdapter {
       });
       return null;
     }
+  }
+
+  /**
+   * Revoke refresh token (logout)
+   * Marks the refresh token as revoked in database
+   */
+  async revokeRefreshToken(refreshToken: string): Promise<boolean> {
+    try {
+      // Verify token first
+      const credentials = await this.validateJwt(refreshToken, this.refreshToken);
+      if (!credentials) {
+        this.logger.warn('Invalid refresh token provided for revocation');
+        return false;
+      }
+
+      // Find token in database and mark as revoked
+      const result = await this.refreshTokenRepository.update(
+        { refreshToken, isRevoked: false },
+        { isRevoked: true },
+      );
+
+      if (result.affected && result.affected > 0) {
+        this.logger.log(`Refresh token revoked for user ${credentials.userId}`);
+        return true;
+      }
+
+      this.logger.warn(`Refresh token not found or already revoked`);
+      return false;
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to revoke refresh token: ${error instanceof Error ? error.message : error}`,
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Generate CSRF token
+   */
+  generateCsrfToken(): string {
+    return uuid();
+  }
+
+  /**
+   * Set authentication cookies
+   */
+  setAuthCookies(
+    reply: FastifyReply,
+    accessToken: string,
+    refreshToken: string,
+    csrfToken: string,
+  ): void {
+    const mode = this.configService.get<AuthMode>('auth.mode', AuthMode.HYBRID);
+
+    if (mode === AuthMode.RESPONSE_ONLY) {
+      return; // Don't set cookies
+    }
+
+    // Access token cookie
+    const accessCookieConfig = {
+      httpOnly: this.configService.get<boolean>('auth.cookies.accessToken.httpOnly', true),
+      secure: this.configService.get<boolean>('auth.cookies.accessToken.secure', true),
+      sameSite: this.configService.get<'strict' | 'lax' | 'none'>(
+        'auth.cookies.accessToken.sameSite',
+        'lax',
+      ),
+      maxAge: this.configService.get<number>('auth.cookies.accessToken.maxAge', 900000),
+    };
+
+    reply.setCookie(
+      this.configService.get<string>('auth.cookies.accessToken.name', 'accessToken'),
+      accessToken,
+      accessCookieConfig,
+    );
+
+    // Refresh token cookie
+    const refreshCookieConfig = {
+      httpOnly: this.configService.get<boolean>('auth.cookies.refreshToken.httpOnly', true),
+      secure: this.configService.get<boolean>('auth.cookies.refreshToken.secure', true),
+      sameSite: this.configService.get<'strict' | 'lax' | 'none'>(
+        'auth.cookies.refreshToken.sameSite',
+        'lax',
+      ),
+      maxAge: this.configService.get<number>('auth.cookies.refreshToken.maxAge', 604800000),
+    };
+
+    reply.setCookie(
+      this.configService.get<string>('auth.cookies.refreshToken.name', 'refreshToken'),
+      refreshToken,
+      refreshCookieConfig,
+    );
+
+    // CSRF token cookie (NOT httpOnly!)
+    const csrfEnabled = this.configService.get<boolean>('auth.csrf.enabled', false);
+    if (csrfEnabled) {
+      const csrfCookieConfig = {
+        httpOnly: false, // JS must read this for sending in header
+        secure: this.configService.get<boolean>('auth.cookies.csrf.secure', true),
+        sameSite: this.configService.get<'strict' | 'lax' | 'none'>(
+          'auth.cookies.csrf.sameSite',
+          'lax',
+        ),
+        maxAge: this.configService.get<number>('auth.cookies.csrf.maxAge', 604800000),
+      };
+
+      reply.setCookie(
+        this.configService.get<string>('auth.cookies.csrf.name', 'csrf-token'),
+        csrfToken,
+        csrfCookieConfig,
+      );
+    }
+  }
+
+  /**
+   * Clear authentication cookies
+   */
+  clearAuthCookies(reply: FastifyReply): void {
+    const cookieNames = [
+      this.configService.get<string>('auth.cookies.accessToken.name', 'accessToken'),
+      this.configService.get<string>('auth.cookies.refreshToken.name', 'refreshToken'),
+      this.configService.get<string>('auth.cookies.csrf.name', 'csrf-token'),
+    ];
+
+    cookieNames.forEach((name) => {
+      reply.clearCookie(name);
+    });
   }
 
   /**

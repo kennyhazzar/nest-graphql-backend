@@ -1,0 +1,134 @@
+log:
+  level: info
+  colorize: false
+
+settings:
+  language: ru
+  locale: ru-RU
+  country: RU
+
+admin:
+  email: admin@yourdomain.com
+  password: CHANGE_ME_STRONG_PASSWORD
+
+host:
+  hostname: 0.0.0.0
+  port: 3000
+  origin: https://yourdomain.com
+  environment: production
+
+# CORS configuration
+cors:
+  enabled: true
+  credentials: true
+  methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - PATCH
+    - OPTIONS
+  allowedHeaders:
+    - Content-Type
+    - Authorization
+    - Accept
+    - X-Requested-With
+    - X-CSRF-Token
+
+graphql:
+  graphiql: false
+  introspection: false
+  path: /graphql
+
+database:
+  username: produser
+  password: CHANGE_ME_DB_PASSWORD
+  host: your-db-host.com
+  port: 5432
+  ssl: true
+  db: production_db
+
+redis:
+  host: your-redis-host.com
+  port: 6379
+  password: CHANGE_ME_REDIS_PASSWORD
+
+# Rate limiting
+throttle:
+  ttl: 60000        # 60 seconds
+  limit: 100        # Max requests per TTL
+  trustProxy: true  # Important for production behind proxy/load balancer
+
+jwt:
+  algorithmJwt: HS256
+  algorithm: SHA512
+  access:
+    token: CHANGE_ME_ACCESS_TOKEN_SECRET_MINIMUM_32_CHARS
+    expires: 15min
+  refresh:
+    token: CHANGE_ME_REFRESH_TOKEN_SECRET_MINIMUM_32_CHARS
+    expires: 7days
+    jwtAlgorithm: HS512
+
+# Authentication configuration
+auth:
+  # Authentication mode for production (choose based on your client apps)
+  # - HYBRID: supports both web browsers with cookies AND mobile apps with tokens
+  # - COOKIES_ONLY: web only, maximum security with httpOnly cookies
+  # - RESPONSE_ONLY: tokens in response only (legacy mode for mobile)
+  mode: HYBRID
+
+  csrf:
+    # IMPORTANT: Enable CSRF protection in production for web applications
+    # CSRF is strictly enforced in production (GraphiQL should be disabled anyway)
+    enabled: true
+
+  cookies:
+    accessToken:
+      name: accessToken
+      httpOnly: true                    # XSS protection - JavaScript cannot access
+      secure: true                      # REQUIRED in production - HTTPS only
+      sameSite: strict                  # Maximum CSRF protection for production
+      maxAge: 900000                    # 15 minutes (900000ms)
+
+    refreshToken:
+      name: refreshToken
+      httpOnly: true                    # XSS protection - JavaScript cannot access
+      secure: true                      # REQUIRED in production - HTTPS only
+      sameSite: strict                  # Maximum CSRF protection for production
+      maxAge: 604800000                 # 7 days (604800000ms)
+
+    csrf:
+      name: csrf-token
+      httpOnly: false                   # Must be readable by JavaScript for CSRF header
+      secure: true                      # REQUIRED in production - HTTPS only
+      sameSite: strict                  # Maximum CSRF protection for production
+      maxAge: 604800000                 # 7 days (604800000ms)
+
+# Email configuration
+mailer:
+  host: smtp.yourdomain.com
+  port: 587
+  user: noreply@yourdomain.com
+  pass: CHANGE_ME_EMAIL_PASSWORD
+  from: noreply@yourdomain.com
+
+# S3 storage (production)
+s3:
+  accessKey: CHANGE_ME_S3_ACCESS_KEY
+  secretKey: CHANGE_ME_S3_SECRET_KEY
+  bucket: production-files
+  region: us-east-1
+  endpoint: https://s3.amazonaws.com  # or your S3-compatible endpoint
+  forcePathStyle: false
+  signedUrlExpires: 604800  # 7 days in seconds
+
+# Graylog logging (optional)
+# graylog:
+#   host: graylog.yourdomain.com
+#   port: 12201
+#   protocol: tcp
+#   facility: backend-production
+#   compression: true
+#   maxChunkSize: 8192
+#   enabled: true

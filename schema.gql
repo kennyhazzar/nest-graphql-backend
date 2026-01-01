@@ -3,12 +3,13 @@
 # ------------------------------------------------------
 
 type AccessTokenResponse {
-  accessToken: String!
+  accessToken: String
 }
 
 type AuthResponse {
-  accessToken: String!
-  refreshToken: String!
+  accessToken: String
+  csrfToken: String
+  refreshToken: String
   user: User!
 }
 
@@ -328,8 +329,13 @@ enum Gender {
   MALE
 }
 
+type LogoutResponse {
+  message: String
+  success: Boolean!
+}
+
 type Mutation {
-  accessFromRefreshToken(input: RefreshTokenInput!): AccessTokenResponse!
+  accessFromRefreshToken(input: RefreshTokenInput): AccessTokenResponse!
 
   """Удаление файла"""
   fileDelete(
@@ -346,6 +352,7 @@ type Mutation {
   """Загрузка файлов"""
   filesUpload(payload: [FileUploadInput!]!): Files!
   login(input: UserLoginInput!): AuthResponse!
+  logout(input: RefreshTokenInput!): LogoutResponse!
 
   """Delete notification"""
   notificationDelete(id: ID!): Boolean!

@@ -6,6 +6,7 @@ import { Logger } from 'nestjs-pino';
 import { NestFastifyApplication, FastifyAdapter } from '@nestjs/platform-fastify';
 import helmet, { FastifyHelmetOptions } from '@fastify/helmet';
 import fastifyStatic from '@fastify/static';
+import fastifyCookie from '@fastify/cookie';
 import mercuriusUpload from 'mercurius-upload';
 
 import { AppModule } from './app.module';
@@ -35,6 +36,11 @@ void (async () => {
 
   const configService = app.get(ConfigService);
   const environment = configService.getOrThrow('host.environment');
+
+  // Register cookie support
+  await app.register(fastifyCookie, {
+    secret: configService.getOrThrow<string>('jwt.access.token'), // use JWT secret for signing
+  });
 
   // Setup origin for CORS and CSP
   const origin: string[] = [configService.getOrThrow('host.origin')];

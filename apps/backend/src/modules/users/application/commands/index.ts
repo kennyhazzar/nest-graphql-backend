@@ -1,4 +1,5 @@
 export * from './user-login.command';
+export * from './user-logout.command';
 export * from './user-create.command';
 export * from './user-update.command';
 export * from './user-delete.command';

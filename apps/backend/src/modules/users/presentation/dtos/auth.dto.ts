@@ -4,11 +4,14 @@ import { UserDto } from './user.dto';
 
 @ObjectType('AuthResponse')
 export class AuthResponseDto {
-  @Field()
-  accessToken!: string;
+  @Field({ nullable: true })
+  accessToken?: string;
 
-  @Field()
-  refreshToken!: string;
+  @Field({ nullable: true })
+  refreshToken?: string;
+
+  @Field({ nullable: true })
+  csrfToken?: string;
 
   @Field(() => UserDto)
   user!: UserDto;
@@ -16,6 +19,15 @@ export class AuthResponseDto {
 
 @ObjectType('AccessTokenResponse')
 export class AccessTokenResponseDto {
+  @Field({ nullable: true })
+  accessToken?: string;
+}
+
+@ObjectType('LogoutResponse')
+export class LogoutResponseDto {
   @Field()
-  accessToken!: string;
+  success!: boolean;
+
+  @Field({ nullable: true })
+  message?: string;
 }

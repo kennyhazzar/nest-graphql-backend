@@ -7,7 +7,12 @@
     "invalidVerify": "Invalid verify",
     "blocked": "User blocked",
     "incorrectEmail": "Incorrect email",
-    "userIdOrEmailMustBeProvided": "User ID or email must be provided"
+    "userIdOrEmailMustBeProvided": "User ID or email must be provided",
+    "logout": {
+      "success": "Successfully logged out",
+      "failed": "Logout failed or token already revoked",
+      "tokenNotProvided": "Refresh token not provided"
+    }
   },
   "role": {
     "notFound": "Role not found",
