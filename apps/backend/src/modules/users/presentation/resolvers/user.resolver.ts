@@ -27,6 +27,9 @@ import {
   AuthResponseDto,
   AccessTokenResponseDto,
   LogoutResponseDto,
+  MagicLinkRequestInput,
+  MagicLinkAuthenticateInput,
+  MagicLinkResponseDto,
 } from '../dtos';
 import { UserMapper } from '../mappers';
 import {
@@ -37,6 +40,8 @@ import {
   UserDeleteCommand,
   UserUpdateThemeCommand,
   AccessFromRefreshTokenCommand,
+  MagicLinkRequestCommand,
+  MagicLinkAuthenticateCommand,
 } from '../../application/commands';
 import { UsersGetQuery, UserGetByIdQuery } from '../../application/queries';
 
@@ -202,5 +207,50 @@ export class UserResolver {
     @Args('input') input: UserUpdateThemeInput,
   ): Promise<UserDto> {
     return this.commandBus.execute(new UserUpdateThemeCommand(userId, input));
+  }
+
+  // Magic Link mutations
+  @Mutation(() => MagicLinkResponseDto)
+  async requestMagicLink(
+    @Args('input') input: MagicLinkRequestInput,
+    @Context() ctx: GraphQLContext,
+  ): Promise<MagicLinkResponseDto> {
+    const fingerprint = ctx.req?.ip || 'unknown';
+    const userAgent = ctx.req?.headers['user-agent'] || 'unknown';
+
+    const result = await this.commandBus.execute(
+      new MagicLinkRequestCommand(input.email, fingerprint, userAgent),
+    );
+
+    return {
+      success: result.success,
+      message: 'If an account exists with this email, a magic link has been sent.',
+    };
+  }
+
+  @Mutation(() => AuthResponseDto)
+  async authenticateWithMagicLink(
+    @Args('input') input: MagicLinkAuthenticateInput,
+    @Context() ctx: GraphQLContext,
+  ): Promise<AuthResponseDto> {
+    const fingerprint = ctx.req?.ip || 'unknown';
+
+    const result = await this.commandBus.execute(
+      new MagicLinkAuthenticateCommand(input.token, fingerprint),
+    );
+
+    // Set cookies
+    this.authService.setAuthCookies(ctx.reply!, result.accessToken!, result.refreshToken!, result.csrfToken!);
+
+    // Determine response mode
+    const mode = this.configService.get<AuthMode>('auth.mode', AuthMode.HYBRID);
+    const csrfEnabled = this.configService.get<boolean>('auth.csrf.enabled', false);
+
+    return {
+      accessToken: mode !== AuthMode.COOKIES_ONLY ? result.accessToken : undefined,
+      refreshToken: mode !== AuthMode.COOKIES_ONLY ? result.refreshToken : undefined,
+      csrfToken: csrfEnabled && mode !== AuthMode.COOKIES_ONLY ? result.csrfToken : undefined,
+      user: result.user,
+    };
   }
 }

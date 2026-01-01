@@ -8,3 +8,5 @@ export * from './access-from-refresh-token.command';
 export * from './user-role-create.command';
 export * from './user-role-update.command';
 export * from './user-role-delete.command';
+export * from './magic-link-request.command';
+export * from './magic-link-authenticate.command';
