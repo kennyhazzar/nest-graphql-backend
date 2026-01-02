@@ -21,6 +21,12 @@ export class AuthResponseDto {
 export class AccessTokenResponseDto {
   @Field({ nullable: true })
   accessToken?: string;
+
+  @Field({ nullable: true })
+  refreshToken?: string;
+
+  @Field({ nullable: true })
+  csrfToken?: string;
 }
 
 @ObjectType('LogoutResponse')

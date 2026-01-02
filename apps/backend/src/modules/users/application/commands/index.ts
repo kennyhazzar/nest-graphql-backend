@@ -4,7 +4,7 @@ export * from './user-create.command';
 export * from './user-update.command';
 export * from './user-delete.command';
 export * from './user-update-theme.command';
-export * from './access-from-refresh-token.command';
+export * from './refresh-tokens.command';
 export * from './user-role-create.command';
 export * from './user-role-update.command';
 export * from './user-role-delete.command';

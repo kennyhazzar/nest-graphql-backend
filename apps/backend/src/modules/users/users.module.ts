@@ -19,7 +19,7 @@ import { PoliciesService } from './infrastructure/services/policies.service';
 import {
   LoginUserHandler,
   UserLogoutHandler,
-  AccessFromRefreshTokenHandler,
+  RefreshTokensHandler,
   UserCreateHandler,
   UserUpdateHandler,
   UserDeleteHandler,
@@ -43,7 +43,7 @@ import {
 const CommandHandlers = [
   LoginUserHandler,
   UserLogoutHandler,
-  AccessFromRefreshTokenHandler,
+  RefreshTokensHandler,
   UserCreateHandler,
   UserUpdateHandler,
   UserDeleteHandler,

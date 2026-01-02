@@ -39,7 +39,7 @@ import {
   UserUpdateCommand,
   UserDeleteCommand,
   UserUpdateThemeCommand,
-  AccessFromRefreshTokenCommand,
+  RefreshTokensCommand,
   MagicLinkRequestCommand,
   MagicLinkAuthenticateCommand,
 } from '../../application/commands';
@@ -87,7 +87,7 @@ export class UserResolver {
   }
 
   @Mutation(() => AccessTokenResponseDto)
-  async accessFromRefreshToken(
+  async refreshTokens(
     @Args('input', { nullable: true, type: () => RefreshTokenInput }) input: RefreshTokenInput | null,
     @Context() ctx: GraphQLContext,
   ): Promise<AccessTokenResponseDto> {
@@ -98,31 +98,19 @@ export class UserResolver {
       throw new UnauthorizedException('Refresh token not provided');
     }
 
-    const accessToken = await this.commandBus.execute(
-      new AccessFromRefreshTokenCommand(refreshToken),
-    );
+    // Execute refresh tokens command (with rotation)
+    const tokens = await this.commandBus.execute(new RefreshTokensCommand(refreshToken, ctx.req!));
 
-    // Update accessToken cookie
+    // Set all cookies (access, refresh, csrf) - refresh token rotation
     const mode = this.configService.get<AuthMode>('auth.mode', AuthMode.HYBRID);
     if (mode !== AuthMode.RESPONSE_ONLY) {
-      const accessCookieConfig = {
-        httpOnly: this.configService.get<boolean>('auth.cookies.accessToken.httpOnly', true),
-        secure: this.configService.get<boolean>('auth.cookies.accessToken.secure', true),
-        sameSite: this.configService.get<'strict' | 'lax' | 'none'>(
-          'auth.cookies.accessToken.sameSite',
-          'lax',
-        ),
-        maxAge: this.configService.get<number>('auth.cookies.accessToken.maxAge', 900000),
-      };
-      ctx.reply!.setCookie(
-        this.configService.get<string>('auth.cookies.accessToken.name', 'accessToken'),
-        accessToken,
-        accessCookieConfig,
-      );
+      this.authService.setAuthCookies(ctx.reply!, tokens.accessToken, tokens.refreshToken, tokens.csrfToken);
     }
 
     return {
-      accessToken: mode !== AuthMode.COOKIES_ONLY ? accessToken : undefined,
+      accessToken: mode !== AuthMode.COOKIES_ONLY ? tokens.accessToken : undefined,
+      refreshToken: mode !== AuthMode.COOKIES_ONLY ? tokens.refreshToken : undefined,
+      csrfToken: tokens.csrfToken,
     };
   }
 
