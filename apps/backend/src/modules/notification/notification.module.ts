@@ -21,6 +21,7 @@ import { NotificationMarkAllReadHandler } from './application/handlers/notificat
 import { NotificationDeleteHandler } from './application/handlers/notification-delete.handler';
 import { NotificationsGetHandler } from './application/handlers/notifications-get.handler';
 import { NotificationUnreadCountHandler } from './application/handlers/notification-unread-count.handler';
+import { UserCreatedEventHandler } from './application/handlers/events';
 
 // Presentation
 import { NotificationResolver } from './presentation/resolvers/notification.resolver';
@@ -34,6 +35,8 @@ const CommandHandlers = [
 
 const QueryHandlers = [NotificationsGetHandler, NotificationUnreadCountHandler];
 
+const EventHandlers = [UserCreatedEventHandler];
+
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([NotificationEntity, NotificationTemplateEntity])],
   providers: [
@@ -41,6 +44,7 @@ const QueryHandlers = [NotificationsGetHandler, NotificationUnreadCountHandler];
     NotificationPubSubService,
     ...CommandHandlers,
     ...QueryHandlers,
+    ...EventHandlers,
     {
       provide: NotificationRepository,
       useClass: NotificationRepositoryImpl,

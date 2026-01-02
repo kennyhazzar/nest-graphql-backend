@@ -96,10 +96,10 @@ const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : '
       provide: APP_GUARD,
       useClass: GraphqlThrottlerGuard,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: CsrfGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: CsrfGuard,
+    },
   ],
 })
 export class AppModule {}

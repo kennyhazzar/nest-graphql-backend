@@ -5,6 +5,12 @@
 import type { Path } from "nestjs-i18n";
 /* prettier-ignore */
 export type I18nTranslations = {
+    "notification": {
+        "welcome": {
+            "title": string;
+            "content": string;
+        };
+    };
     "user": {
         "auth": {
             "password_mismatched": string;

@@ -9,3 +9,6 @@ export * from './get-template.handler';
 export * from './get-template-by-name.handler';
 export * from './get-all-templates.handler';
 export * from './get-active-templates.handler';
+
+// Event Handlers
+export * from './events';

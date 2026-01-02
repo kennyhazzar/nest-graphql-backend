@@ -3,16 +3,16 @@ export class Template {
     public readonly id: string,
     public readonly name: string,
     public readonly subject: string,
-    public readonly content: string,
+    public readonly content: string | undefined,
     public readonly isActive: boolean,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
 
-  static create(payload: { name: string; subject: string; content: string; isActive?: boolean }): {
+  static create(payload: { name: string; subject: string; content?: string; isActive?: boolean }): {
     name: string;
     subject: string;
-    content: string;
+    content?: string;
     isActive: boolean;
   } {
     return {

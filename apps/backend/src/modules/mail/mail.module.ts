@@ -12,6 +12,7 @@ import { TemplateRepository } from './domain/repositories/template.repository';
 import { TemplateRepositoryImpl } from './infrastructure/repositories/template.repository.impl';
 import { MailService } from './infrastructure/services/mail.service';
 import { TemplateService } from './infrastructure/services/template.service';
+import { TemplateSeedService } from './infrastructure/services/template-seed.service';
 import { MailProcessor } from './infrastructure/processors/mail.processor';
 import {
   SendMailHandler,
@@ -25,6 +26,7 @@ import {
   GetTemplateByNameHandler,
   GetAllTemplatesHandler,
   GetActiveTemplatesHandler,
+  UserCreatedEmailEventHandler,
 } from './application/handlers';
 import { MailEntity, MailTemplateEntity } from './infrastructure/entities';
 
@@ -52,6 +54,12 @@ const QueryHandlers = [
   GetAllTemplatesHandler,
   GetActiveTemplatesHandler,
 ];
+
+/**
+ * Event handlers for mail module
+ * React to domain events from other modules
+ */
+const EventHandlers = [UserCreatedEmailEventHandler];
 
 /**
  * Mail Module
@@ -108,8 +116,10 @@ const QueryHandlers = [
     MailProcessor,
     MailService,
     TemplateService,
+    TemplateSeedService,
     ...CommandHandlers,
     ...QueryHandlers,
+    ...EventHandlers,
   ],
   exports: [MailRepository, TemplateRepository, MailService, TemplateService],
 })

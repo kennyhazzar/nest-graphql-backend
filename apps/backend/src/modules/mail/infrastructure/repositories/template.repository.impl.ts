@@ -24,7 +24,7 @@ export class TemplateRepositoryImpl extends TemplateRepository {
   async create(template: {
     name: MailTemplateType;
     subject: string;
-    content: string;
+    content?: string;
     isActive?: boolean;
   }): Promise<Template> {
     return this.templateRepository

@@ -3,7 +3,7 @@ import { Template } from '../entities/template.entity';
 import { MailTemplateEntity } from '../../infrastructure/entities';
 
 export abstract class TemplateRepository {
-  abstract create(template: { name: string; subject: string; content: string; isActive?: boolean }): Promise<Template>;
+  abstract create(template: { name: string; subject: string; content?: string; isActive?: boolean }): Promise<Template>;
 
   abstract findById(id: string): Promise<Template | null>;
 

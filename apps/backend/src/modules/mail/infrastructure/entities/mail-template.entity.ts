@@ -22,9 +22,10 @@ export class MailTemplateEntity extends BaseUUIDMixin('mail_template') {
 
   @Column({
     type: 'text',
-    comment: 'Handlebars template content',
+    nullable: true,
+    comment: 'Handlebars template content (optional, can use .hbs files instead)',
   })
-  content!: string;
+  content?: string;
 
   @Column({
     type: 'boolean',

@@ -3,6 +3,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as Handlebars from 'handlebars';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 import { Mail, MailStatus } from '../../domain';
 import { MailRepository, TemplateRepository } from '../../domain/repositories';
@@ -50,8 +52,21 @@ export class MailService {
       // Используем subject из шаблона, если не задан
       const finalSubject = subject || templateEntity.subject;
 
-      // Компилируем шаблон из базы данных
-      const compiledTemplate = Handlebars.compile(templateEntity.content);
+      // Компилируем шаблон: если есть content в БД - используем его, иначе читаем из .hbs файла
+      let templateContent: string;
+      if (templateEntity.content) {
+        templateContent = templateEntity.content;
+      } else {
+        // Читаем .hbs файл из options/templates
+        const templatePath = join(__dirname, '../../../options/templates', `${template}.hbs`);
+        try {
+          templateContent = readFileSync(templatePath, 'utf-8');
+        } catch (error) {
+          throw new Error(`Template file '${template}.hbs' not found at ${templatePath}`);
+        }
+      }
+
+      const compiledTemplate = Handlebars.compile(templateContent);
       const html = compiledTemplate(context);
 
       await this.mailerService.sendMail({
