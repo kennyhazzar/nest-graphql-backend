@@ -35,7 +35,7 @@ export class OAuthLinkProviderHandler implements ICommandHandler<OAuthLinkProvid
     // Check if provider already linked
     const existing = await this.identityRepository.findByUserIdAndProvider(userId, provider);
     if (existing) {
-      throw new ConflictException(`${provider} is already linked to this account`);
+      throw new ConflictException('user.auth.oauth.alreadyLinked');
     }
 
     // Get OAuth provider adapter
@@ -50,7 +50,7 @@ export class OAuthLinkProviderHandler implements ICommandHandler<OAuthLinkProvid
     // Check if this OAuth account is already linked to another user
     const existingIdentity = await this.identityRepository.findByProviderUserId(provider, userInfo.id);
     if (existingIdentity) {
-      throw new ConflictException('This OAuth account is already linked to another user');
+      throw new ConflictException('user.auth.oauth.accountAlreadyLinked');
     }
 
     // Create identity

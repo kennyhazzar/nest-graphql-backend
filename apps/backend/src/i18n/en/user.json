@@ -8,10 +8,26 @@
     "blocked": "User blocked",
     "incorrectEmail": "Incorrect email",
     "userIdOrEmailMustBeProvided": "User ID or email must be provided",
+    "tokenNotFound": "Refresh token not found in database",
+    "tokenRevoked": "Refresh token has been revoked. Possible token theft detected!",
+    "tokenExpired": "Refresh token has expired",
     "logout": {
       "success": "Successfully logged out",
       "failed": "Logout failed or token already revoked",
       "tokenNotProvided": "Refresh token not provided"
+    },
+    "magicLink": {
+      "invalidOrExpired": "Invalid or expired magic link",
+      "expiredOrUsed": "Magic link has expired or already been used",
+      "invalidOrigin": "Invalid request origin",
+      "userNotFound": "User not found for magic link"
+    },
+    "oauth": {
+      "providerNotLinked": "OAuth provider is not linked to this account",
+      "userNotFound": "User not found for OAuth identity",
+      "cannotRemoveLastMethod": "Cannot remove last authentication method. Please set a password first or keep at least one OAuth provider linked.",
+      "alreadyLinked": "OAuth provider is already linked to this account",
+      "accountAlreadyLinked": "This OAuth account is already linked to another user"
     }
   },
   "role": {

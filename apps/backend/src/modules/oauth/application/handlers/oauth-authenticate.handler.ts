@@ -61,7 +61,7 @@ export class OAuthAuthenticateHandler implements ICommandHandler<OAuthAuthentica
       // Identity exists - get the user
       const foundUser = await this.userRepository.findById(identity.userId);
       if (!foundUser) {
-        throw new NotFoundException('User not found for existing identity');
+        throw new NotFoundException('user.auth.oauth.userNotFound');
       }
       user = foundUser;
 

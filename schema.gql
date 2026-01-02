@@ -4,6 +4,8 @@
 
 type AccessTokenResponse {
   accessToken: String
+  csrfToken: String
+  refreshToken: String
 }
 
 type AuthResponse {
@@ -362,7 +364,6 @@ type MagicLinkResponse {
 }
 
 type Mutation {
-  accessFromRefreshToken(input: RefreshTokenInput): AccessTokenResponse!
   authenticateWithMagicLink(input: MagicLinkAuthenticateInput!): AuthResponse!
 
   """Удаление файла"""
@@ -393,6 +394,7 @@ type Mutation {
   oauthAuthenticate(input: OAuthAuthenticateInput!): OAuthAuthResponse!
   oauthLinkProvider(input: OAuthLinkProviderInput!): Identity!
   oauthUnlinkProvider(provider: String!): Boolean!
+  refreshTokens(input: RefreshTokenInput): AccessTokenResponse!
   requestMagicLink(input: MagicLinkRequestInput!): MagicLinkResponse!
   userCreate(input: UserCreateInput!): User!
   userDelete(id: ID!): Status!

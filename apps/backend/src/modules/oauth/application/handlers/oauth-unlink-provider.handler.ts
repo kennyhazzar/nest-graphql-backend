@@ -27,13 +27,13 @@ export class OAuthUnlinkProviderHandler implements ICommandHandler<OAuthUnlinkPr
     // Find identity
     const identity = await this.identityRepository.findByUserIdAndProvider(userId, provider);
     if (!identity) {
-      throw new NotFoundException(`${provider} is not linked to this account`);
+      throw new NotFoundException('user.auth.oauth.providerNotLinked');
     }
 
     // IMPORTANT: Check if user has at least one auth method remaining
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('user.auth.oauth.userNotFound');
     }
 
     const identitiesCount = await this.identityRepository.countByUserId(userId);
@@ -41,9 +41,7 @@ export class OAuthUnlinkProviderHandler implements ICommandHandler<OAuthUnlinkPr
 
     // User must have at least one auth method (password OR at least one OAuth provider)
     if (!hasPassword && identitiesCount <= 1) {
-      throw new BadRequestException(
-        'Cannot remove last authentication method. Please set a password first or keep at least one OAuth provider linked.',
-      );
+      throw new BadRequestException('user.auth.oauth.cannotRemoveLastMethod');
     }
 
     // Revoke OAuth token (best effort)

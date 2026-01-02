@@ -32,13 +32,13 @@ export class MagicLinkAuthenticateHandler implements ICommandHandler<MagicLinkAu
 
     if (!magicLinkToken) {
       this.logger.warn(`Invalid magic link token: ${token.substring(0, 8)}...`);
-      throw new NotFoundException('Invalid or expired magic link');
+      throw new NotFoundException('user.auth.magicLink.invalidOrExpired');
     }
 
     // Validate token
     if (!magicLinkToken.isValid()) {
       this.logger.warn(`Magic link token is not valid (used or expired): ${token.substring(0, 8)}...`);
-      throw new ForbiddenException('Magic link has expired or already been used');
+      throw new ForbiddenException('user.auth.magicLink.expiredOrUsed');
     }
 
     // Validate fingerprint (security check)
@@ -46,7 +46,7 @@ export class MagicLinkAuthenticateHandler implements ICommandHandler<MagicLinkAu
       this.logger.warn(
         `Fingerprint mismatch for magic link token: ${token.substring(0, 8)}... (expected: ${magicLinkToken.fingerprint}, got: ${fingerprint})`,
       );
-      throw new ForbiddenException('Invalid request origin');
+      throw new ForbiddenException('user.auth.magicLink.invalidOrigin');
     }
 
     // Find user by email
@@ -54,7 +54,7 @@ export class MagicLinkAuthenticateHandler implements ICommandHandler<MagicLinkAu
 
     if (!user) {
       this.logger.warn(`User not found for email: ${magicLinkToken.email}`);
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('user.auth.magicLink.userNotFound');
     }
 
     // Mark token as used
