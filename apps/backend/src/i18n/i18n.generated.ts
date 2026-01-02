@@ -15,10 +15,26 @@ export type I18nTranslations = {
             "blocked": string;
             "incorrectEmail": string;
             "userIdOrEmailMustBeProvided": string;
+            "tokenNotFound": string;
+            "tokenRevoked": string;
+            "tokenExpired": string;
             "logout": {
                 "success": string;
                 "failed": string;
                 "tokenNotProvided": string;
+            };
+            "magicLink": {
+                "invalidOrExpired": string;
+                "expiredOrUsed": string;
+                "invalidOrigin": string;
+                "userNotFound": string;
+            };
+            "oauth": {
+                "providerNotLinked": string;
+                "userNotFound": string;
+                "cannotRemoveLastMethod": string;
+                "alreadyLinked": string;
+                "accountAlreadyLinked": string;
             };
         };
         "role": {

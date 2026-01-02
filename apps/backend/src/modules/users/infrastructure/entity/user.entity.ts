@@ -26,8 +26,8 @@ export class UserEntity extends BaseUUIDMixin('user') {
   @Column({ type: 'boolean', default: false, comment: 'Email verified' })
   verified!: boolean;
 
-  @Column({ type: 'varchar', length: 255, comment: 'User password' })
-  password!: string;
+  @Column({ type: 'varchar', length: 255, nullable: true, comment: 'User password (nullable for OAuth-only users)' })
+  password?: string;
 
   @Column({ type: 'varchar', length: 100, comment: 'First name' })
   name!: string;

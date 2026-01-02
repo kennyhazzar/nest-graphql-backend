@@ -8,10 +8,26 @@
     "blocked": "Пользователь заблокирован",
     "incorrectEmail": "Неверный email",
     "userIdOrEmailMustBeProvided": "ИД пользователя или email должны быть предоставлены",
+    "tokenNotFound": "Refresh токен не найден в базе данных",
+    "tokenRevoked": "Refresh токен был отозван. Возможна кража токена!",
+    "tokenExpired": "Refresh токен истек",
     "logout": {
       "success": "Успешный выход из системы",
       "failed": "Не удалось выйти или токен уже был отозван",
       "tokenNotProvided": "Refresh токен не предоставлен"
+    },
+    "magicLink": {
+      "invalidOrExpired": "Недействительная или истекшая ссылка для входа",
+      "expiredOrUsed": "Ссылка для входа истекла или уже использована",
+      "invalidOrigin": "Неверный источник запроса",
+      "userNotFound": "Пользователь не найден для magic link"
+    },
+    "oauth": {
+      "providerNotLinked": "OAuth провайдер не привязан к этому аккаунту",
+      "userNotFound": "Пользователь не найден для OAuth идентификатора",
+      "cannotRemoveLastMethod": "Невозможно удалить последний метод аутентификации. Пожалуйста, установите пароль или оставьте хотя бы один OAuth провайдер.",
+      "alreadyLinked": "OAuth провайдер уже привязан к этому аккаунту",
+      "accountAlreadyLinked": "Этот OAuth аккаунт уже привязан к другому пользователю"
     }
   },
   "role": {

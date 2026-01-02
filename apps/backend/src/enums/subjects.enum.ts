@@ -16,6 +16,10 @@ export enum Subjects {
 
   // Notification subjects
   NOTIFICATION = 'Notification',
+
+  // Authentication subjects
+  IDENTITY = 'Identity',
+  OAUTH = 'OAuth',
 }
 
 registerEnumType(Subjects, {
@@ -28,5 +32,7 @@ registerEnumType(Subjects, {
     FILE: { description: 'Own file operations' },
     FILE_ADMIN: { description: 'File administration' },
     NOTIFICATION: { description: 'Own notifications' },
+    IDENTITY: { description: 'OAuth identity management' },
+    OAUTH: { description: 'OAuth provider operations' },
   },
 });

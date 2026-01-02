@@ -30,6 +30,8 @@ import { MigrationModule } from './modules/migration/migration.module';
 import { FileModule } from './modules/file/file.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { HealthModule } from './modules/health/health.module';
+import { MailModule } from './modules/mail/mail.module';
+import { OAuthModule } from './modules/oauth/oauth.module';
 import { TimestampScalar } from './common/scalars/timestamp.scalar';
 
 const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : 'config.yaml';
@@ -57,6 +59,10 @@ const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : '
     HealthModule,
 
     MigrationModule,
+
+    MailModule,
+
+    OAuthModule,
 
     GraphQLModule.forRootAsync<MercuriusDriverConfig>({
       inject: [ConfigService, AuthServiceAdapter],
