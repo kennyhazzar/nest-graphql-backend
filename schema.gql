@@ -381,7 +381,7 @@ type Mutation {
   """Загрузка файлов"""
   filesUpload(payload: [FileUploadInput!]!): Files!
   login(input: UserLoginInput!): AuthResponse!
-  logout(input: RefreshTokenInput!): LogoutResponse!
+  logout(input: RefreshTokenInput): LogoutResponse!
 
   """Delete notification"""
   notificationDelete(id: ID!): Boolean!
@@ -506,7 +506,7 @@ type Query {
 }
 
 input RefreshTokenInput {
-  refreshToken: String!
+  refreshToken: String
 }
 
 """User role types"""
