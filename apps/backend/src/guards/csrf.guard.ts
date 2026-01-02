@@ -13,9 +13,10 @@ import { GqlExecutionContext } from '@nestjs/graphql';
  * 3. Guard validates that the cookie value matches the header value
  *
  * ## Automatic Exemptions:
- * - GET requests (GraphQL queries and introspection)
+ * - GraphQL queries (only mutations need CSRF protection)
  * - Requests when auth.csrf.enabled = false in config
  * - GraphiQL requests in non-production environments
+ * - Public mutations: login, requestMagicLink, authenticateWithMagicLink, oauthAuthenticate
  *
  * ## Usage:
  *
@@ -77,11 +78,7 @@ export class CsrfGuard implements CanActivate {
     const gqlContext = GqlExecutionContext.create(context);
     const ctx = gqlContext.getContext();
     const req = ctx.req;
-
-    // Skip GET requests (GraphQL introspection, queries)
-    if (req.method === 'GET') {
-      return true;
-    }
+    const info = gqlContext.getInfo();
 
     // Skip CSRF check for GraphiQL in non-production environments
     const graphiqlEnabled = this.configService.get<boolean>('graphql.graphiql', false);
@@ -91,6 +88,27 @@ export class CsrfGuard implements CanActivate {
 
     if (graphiqlEnabled && environment !== 'production' && isGraphiqlRequest) {
       return true; // Allow GraphiQL requests in development
+    }
+
+    // In GraphQL, all requests are POST. Check operation type instead of HTTP method.
+    // Only mutations need CSRF protection, queries are safe (read-only)
+    const operationType = info?.operation?.operation;
+    if (operationType !== 'mutation') {
+      return true; // Allow queries, subscriptions, introspection
+    }
+
+    // Public mutations that don't require CSRF token (user doesn't have token yet)
+    const operationName = info?.fieldName;
+
+    const publicMutations = [
+      'login',
+      'requestMagicLink',
+      'authenticateWithMagicLink',
+      'oauthAuthenticate',
+    ];
+
+    if (operationName && publicMutations.includes(operationName)) {
+      return true; // Allow public mutations without CSRF token
     }
 
     // Read CSRF token from cookie

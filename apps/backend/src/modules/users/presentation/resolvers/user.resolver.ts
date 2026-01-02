@@ -123,11 +123,11 @@ export class UserResolver {
 
   @Mutation(() => LogoutResponseDto)
   async logout(
-    @Args('input') input: RefreshTokenInput,
+    @Args('input', { nullable: true, type: () => RefreshTokenInput }) input: RefreshTokenInput | null,
     @Context() ctx: GraphQLContext,
   ): Promise<LogoutResponseDto> {
     // Try to get refresh token from cookie or from input
-    const refreshToken = ctx.req?.cookies?.refreshToken || input.refreshToken;
+    const refreshToken = ctx.req?.cookies?.refreshToken || input?.refreshToken;
 
     if (!refreshToken) {
       return {

@@ -125,8 +125,8 @@ export class UserUpdateThemeInput {
 
 @InputType('RefreshTokenInput')
 export class RefreshTokenInput {
-  @Field()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsString({ message: i18nValidationMessage('validation.IS_DEFINED_REFRESH') })
-  @IsNotEmpty({ message: i18nValidationMessage('validation.IS_DEFINED_REFRESH') })
-  refreshToken!: string;
+  refreshToken?: string;
 }

@@ -12,6 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { GraphqlThrottlerGuard } from './guards/graphql-throttler.guard';
+import { CsrfGuard } from './guards/csrf.guard';
 
 import {
   LoggerModuleOptions,
@@ -89,6 +90,10 @@ const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : '
       provide: APP_GUARD,
       useClass: GraphqlThrottlerGuard,
     },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: CsrfGuard,
+    // },
   ],
 })
 export class AppModule {}
