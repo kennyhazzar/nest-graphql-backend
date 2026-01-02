@@ -56,6 +56,11 @@ export class LoginUserHandler implements ICommandHandler<UserLoginCommand> {
       throw new UnauthorizedException('user.auth.blocked');
     }
 
+    // If user has no password set, treat as invalid credentials (don't reveal account details)
+    if (!user.password) {
+      throw new UnauthorizedException('user.auth.invalidCredentials');
+    }
+
     const valid = await this.passwordService.verifyPassword(user.password, password);
     if (!valid) {
       throw new UnauthorizedException('user.auth.password_mismatched');

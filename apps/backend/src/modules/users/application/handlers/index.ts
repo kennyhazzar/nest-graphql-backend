@@ -1,5 +1,5 @@
 export * from './user-login.handler';
-export * from './access-from-refresh-token.handler';
+export * from './refresh-tokens.handler';
 export * from './user-logout.handler';
 export * from './user-create.handler';
 export * from './user-update.handler';
@@ -14,3 +14,5 @@ export * from './user-role-update.handler';
 export * from './user-role-delete.handler';
 export * from './user-role-get-by-id.handler';
 export * from './user-roles-get.handler';
+export * from './magic-link-request.handler';
+export * from './magic-link-authenticate.handler';

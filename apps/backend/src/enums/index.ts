@@ -10,3 +10,4 @@ export * from './file-type.enum';
 export * from './file-from.enum';
 export * from './notification-type.enum';
 export * from './password-hash-type.enum';
+export * from './oauth-provider-type.enum';
