@@ -4,8 +4,7 @@ import { RoleType } from '@/enums/role-type.enum';
 import { Actions } from '@/enums/actions.enum';
 import { Subjects } from '@/enums/subjects.enum';
 import { AppAbility, CaslAbilityFactory } from '../../../../factories/casl-ability.factory';
-import { RolePermissionRepository } from '../../domain/repositories/role-permission.repository';
-import { RolePermissionEntity } from '../entity/role-permission.entity';
+import { IRolePermission, RolePermissionRepository } from '../../domain/repositories/role-permission.repository';
 
 /**
  * Service for working with access policies
@@ -59,12 +58,10 @@ export class PoliciesService {
   async fillAbilities(): Promise<void> {
     try {
       // Get all permissions from DB
-      const allPermissions = await this.rolePermissionRepository.find({
-        where: { isActive: true },
-      });
+      const allPermissions = await this.rolePermissionRepository.find({ isActive: true });
 
       // Group by role types
-      const permissionsByRole = new Map<RoleType, RolePermissionEntity[]>();
+      const permissionsByRole = new Map<RoleType, IRolePermission[]>();
 
       for (const permission of allPermissions) {
         if (!permissionsByRole.has(permission.roleType)) {

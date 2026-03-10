@@ -1,17 +1,47 @@
-import { UserEntity } from '../../infrastructure/entity';
+import { IdType } from '@/interfaces/id.type';
+import { Gender } from '@/enums/gender.enum';
+import { Theme } from '@/enums/theme.enum';
+import { IUser, UserCreateData } from '../interfaces/user.interface';
+import { IUserRole } from '../interfaces/user-role.interface';
+
+export type { IUser, UserCreateData, IUserRole };
 
 /**
- * Domain User entity with business logic
+ * Domain User entity — pure TypeScript, no ORM dependency.
  */
-export class User extends UserEntity {
-  /**
-   * Factory method to create a new user
-   * @param data - User data (password must be already hashed by caller)
-   */
-  static create(data: Partial<UserEntity>): User {
+export class User implements IUser {
+  id!: IdType;
+  email!: string;
+  forgotConfirmKey!: string | null;
+  emailConfirmKey!: string | null;
+  verified!: boolean;
+  password?: string;
+  name!: string;
+  surname!: string;
+  middleName?: string;
+  phone?: string;
+  role?: IUserRole;
+  roleId!: string;
+  gender!: Gender;
+  birthday?: Date;
+  blocked!: boolean;
+  country!: string;
+  language!: string;
+  locale!: string;
+  theme!: Theme;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date | null;
+
+  static create(data: UserCreateData): User {
     const user = new User();
-    Object.assign(user, data);
-    // Password should be already hashed by calling code using PasswordService
+    Object.assign(user, {
+      forgotConfirmKey: null,
+      emailConfirmKey: null,
+      verified: false,
+      blocked: false,
+      ...data,
+    });
     return user;
   }
 }

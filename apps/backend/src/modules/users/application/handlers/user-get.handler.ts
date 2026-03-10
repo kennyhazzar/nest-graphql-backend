@@ -11,7 +11,7 @@ export class UserGetHandler implements IQueryHandler<UserGetQuery> {
   constructor(private readonly userRepository: UserRepository) {}
 
   async execute(query: UserGetQuery): Promise<UserDto> {
-    const user = await this.userRepository.findOne(query.options);
+    const user = await this.userRepository.findOne(query.filter, query.options);
     if (!user) {
       throw new NotFoundException('user.notFound');
     }

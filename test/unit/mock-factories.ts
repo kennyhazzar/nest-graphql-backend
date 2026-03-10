@@ -40,8 +40,6 @@ export const createMockUser = (overrides: Partial<UserDto> = {}): UserDto => ({
   language: 'ru',
   locale: 'ru-RU',
   theme: Theme.LIGHT,
-  roleId: 'test-role-id',
-  avatarId: 'test-avatar-id',
   createdAt: new Date('2023-01-01'),
   updatedAt: new Date('2023-01-02'),
   ...overrides,

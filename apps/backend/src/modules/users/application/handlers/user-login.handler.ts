@@ -20,29 +20,7 @@ export class LoginUserHandler implements ICommandHandler<UserLoginCommand> {
   async execute(command: UserLoginCommand): Promise<User> {
     const { email, password } = command.payload;
 
-    const user = await this.userRepository.findByEmail(email, {
-      select: {
-        id: true,
-        email: true,
-        password: true,
-        verified: true,
-        blocked: true,
-        name: true,
-        surname: true,
-        middleName: true,
-        phone: true,
-        gender: true,
-        birthday: true,
-        country: true,
-        language: true,
-        locale: true,
-        theme: true,
-        roleId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      loadEagerRelations: true,
-    });
+    const user = await this.userRepository.findByEmail(email, { includePassword: true });
 
     if (!user) {
       throw new UnauthorizedException('user.auth.invalidCredentials');

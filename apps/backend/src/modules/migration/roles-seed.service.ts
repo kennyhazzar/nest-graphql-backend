@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 
-import { RolePermissionRepository, UserRoleRepository } from '@/modules/users/domain/repositories';
-import { RolePermissionEntity, UserRoleEntity } from '@/modules/users/infrastructure';
+import { RolePermissionRepository, RolePermissionCreatePayload, UserRoleRepository } from "@/modules/users/domain/repositories";
+import { UserRoleEntity } from "@/modules/users/infrastructure";
 import { rolesConfig, rolePermissionsConfig } from './configs/roles.config';
 
 /**
@@ -32,7 +32,7 @@ export class RolesSeedService {
       this.logger.debug('Cleared existing permissions');
 
       // Create new permissions
-      const allPermissions: Partial<RolePermissionEntity>[] = [];
+      const allPermissions: RolePermissionCreatePayload[] = [];
 
       for (const roleConfig of rolePermissionsConfig) {
         for (const permission of roleConfig.permissions) {

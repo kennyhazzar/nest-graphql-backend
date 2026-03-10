@@ -8,6 +8,9 @@ import { AuthServiceAdapter } from '../../infrastructure/adapters';
 import { UserLoginInput, UserCreateInput, AuthResponseDto, UserDto } from '../dtos';
 import { UserLoginCommand, UserCreateCommand } from '../../application/commands';
 import { UsersGetQuery, UserGetByIdQuery } from '../../application/queries';
+import { Gender } from '@/enums/gender.enum';
+import { RoleType } from '@/enums/role-type.enum';
+import { Theme } from '@/enums/theme.enum';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { PoliciesGuard } from '@/guards/policies.guard';
 
@@ -106,15 +109,20 @@ describe('UserResolver (Integration)', () => {
         email: loginInput.email,
         name: 'John',
         surname: 'Doe',
-        middleName: null,
-        phone: null,
-        gender: null,
-        birthday: null,
+        middleName: undefined,
+        phone: undefined,
+        gender: Gender.MALE,
+        birthday: undefined,
         verified: true,
+        blocked: false,
+        country: "US",
+        language: "en",
+        locale: "en-US",
+        theme: "light" as any,
         role: {
           id: 'role-uuid',
           name: 'User',
-          type: 'USER',
+          type: RoleType.USER,
         },
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
@@ -168,15 +176,20 @@ describe('UserResolver (Integration)', () => {
         email: loginInput.email,
         name: 'Admin',
         surname: 'User',
-        middleName: null,
-        phone: null,
-        gender: null,
-        birthday: null,
+        middleName: undefined,
+        phone: undefined,
+        gender: Gender.MALE,
+        birthday: undefined,
         verified: true,
+        blocked: false,
+        country: "US",
+        language: "en",
+        locale: "en-US",
+        theme: "light" as any,
         role: {
           id: 'admin-role-uuid',
           name: 'Administrator',
-          type: 'ADMIN',
+          type: RoleType.ADMIN,
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -200,7 +213,7 @@ describe('UserResolver (Integration)', () => {
       expect(commandBus.execute).toHaveBeenCalledTimes(1);
       const executedCommand = commandBus.execute.mock.calls[0][0];
       expect(executedCommand).toBeInstanceOf(UserLoginCommand);
-      expect(executedCommand.payload).toEqual(loginInput);
+      expect((executedCommand as UserLoginCommand).payload).toEqual(loginInput);
     });
   });
 
@@ -212,10 +225,10 @@ describe('UserResolver (Integration)', () => {
         password: 'SecurePass123!',
         name: 'Jane',
         surname: 'Smith',
-        middleName: null,
+        middleName: undefined,
         phone: '+1234567890',
-        gender: null,
-        birthday: null,
+        gender: Gender.MALE,
+        birthday: undefined,
         roleId: 'role-uuid-123',
       };
 
@@ -226,13 +239,18 @@ describe('UserResolver (Integration)', () => {
         surname: createInput.surname,
         middleName: createInput.middleName,
         phone: createInput.phone,
-        gender: createInput.gender,
+        gender: createInput.gender ?? Gender.MALE,
         birthday: createInput.birthday,
         verified: true,
+        blocked: false,
+        country: "US",
+        language: "en",
+        locale: "en-US",
+        theme: "light" as any,
         role: {
           id: createInput.roleId,
           name: 'User',
-          type: 'USER',
+          type: RoleType.USER,
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -259,12 +277,12 @@ describe('UserResolver (Integration)', () => {
             email: 'user1@example.com',
             name: 'User',
             surname: 'One',
-            middleName: null,
-            phone: null,
-            gender: null,
-            birthday: null,
+            middleName: undefined,
+            phone: undefined,
+            gender: Gender.MALE,
+            birthday: undefined,
             verified: true,
-            role: { id: 'role-1', name: 'User', type: 'USER' },
+            role: { id: 'role-1', name: 'User', type: RoleType.USER },
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -273,12 +291,12 @@ describe('UserResolver (Integration)', () => {
             email: 'user2@example.com',
             name: 'User',
             surname: 'Two',
-            middleName: null,
-            phone: null,
-            gender: null,
-            birthday: null,
+            middleName: undefined,
+            phone: undefined,
+            gender: Gender.MALE,
+            birthday: undefined,
             verified: true,
-            role: { id: 'role-2', name: 'Admin', type: 'ADMIN' },
+            role: { id: 'role-2', name: 'Admin', type: RoleType.ADMIN },
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -294,7 +312,7 @@ describe('UserResolver (Integration)', () => {
       // Assert
       expect(queryBus.execute).toHaveBeenCalledWith(new UsersGetQuery());
       expect(result).toEqual(mockUsers);
-      expect(result.items).toHaveLength(2);
+      expect(result.nodes).toHaveLength(2);
       expect(result.totalCount).toBe(2);
     });
   });
@@ -308,15 +326,20 @@ describe('UserResolver (Integration)', () => {
         email: 'test@example.com',
         name: 'John',
         surname: 'Doe',
-        middleName: null,
-        phone: null,
-        gender: null,
-        birthday: null,
+        middleName: undefined,
+        phone: undefined,
+        gender: Gender.MALE,
+        birthday: undefined,
         verified: true,
+        blocked: false,
+        country: "US",
+        language: "en",
+        locale: "en-US",
+        theme: "light" as any,
         role: {
           id: 'role-uuid',
           name: 'User',
-          type: 'USER',
+          type: RoleType.USER,
         },
         createdAt: new Date(),
         updatedAt: new Date(),

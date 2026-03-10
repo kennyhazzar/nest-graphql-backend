@@ -52,10 +52,10 @@ describe('UserCreateHandler', () => {
       password: 'SecurePassword123!',
       name: 'John',
       surname: 'Doe',
-      middleName: null,
+      middleName: undefined,
       phone: '+1234567890',
-      gender: null,
-      birthday: null,
+      gender: undefined,
+      birthday: undefined,
       roleId: 'role-uuid-123',
     };
 

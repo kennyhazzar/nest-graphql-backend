@@ -1,36 +1,28 @@
-import { DeepPartial, FindManyOptions, FindOneOptions, UpdateResult } from 'typeorm';
-
 import { IdType } from '@/interfaces/id.type';
-import type { RoleType } from '@/enums/role-type.enum';
-import { UserEntity } from '@/modules/users/infrastructure/entity';
+import { RoleType } from '@/enums/role-type.enum';
 import { User, Users } from '../entities';
+import { UserFilter, UserFindOneOptions, UserUpdatePayload, UpdateAffected } from './user.filter';
 
 export abstract class UserRepository {
-  abstract find(options?: FindManyOptions<UserEntity>): Promise<Users>;
+  abstract find(filter?: UserFilter): Promise<Users>;
 
-  abstract findOne(options: FindOneOptions<UserEntity>): Promise<User | null>;
+  abstract findOne(filter: UserFilter, options?: UserFindOneOptions): Promise<User | null>;
 
-  abstract findById(id: IdType, options?: FindOneOptions<UserEntity>): Promise<User | null>;
+  abstract findById(id: IdType, options?: UserFindOneOptions): Promise<User | null>;
 
-  abstract findByIds(ids: IdType[], options?: FindManyOptions<UserEntity>): Promise<Users>;
+  abstract findByIds(ids: IdType[]): Promise<Users>;
 
-  abstract findByEmail(email: string, options?: FindOneOptions<UserEntity>): Promise<User | null>;
+  abstract findByEmail(email: string, options?: UserFindOneOptions): Promise<User | null>;
 
-  abstract create(user: User | DeepPartial<UserEntity>): Promise<User>;
+  abstract create(user: User): Promise<User>;
 
-  abstract update(userId: IdType, update: DeepPartial<UserEntity>): Promise<UpdateResult>;
+  abstract update(userId: IdType, update: UserUpdatePayload): Promise<UpdateAffected>;
 
-  abstract delete(id: IdType): Promise<UpdateResult>;
+  abstract delete(id: IdType): Promise<UpdateAffected>;
 
   abstract existsByEmail(email: string): Promise<boolean>;
 
-  /**
-   * Count users with specific role access.
-   */
   abstract countByRoleAccess(roleType?: RoleType): Promise<number>;
 
-  /**
-   * Find user ID with specific role type.
-   */
   abstract findIdWithRoleType(roleType?: RoleType): Promise<IdType | null>;
 }

@@ -1,12 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Logger, UnauthorizedException, ForbiddenException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Inject, Logger, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { eq } from 'drizzle-orm';
 
+import { DRIZZLE_CONNECTION } from '@/common/drizzle/drizzle.provider';
+import * as schema from '@/common/drizzle/schema';
+import { refresh as refreshTable } from '@/common/drizzle/schema';
 import { AuthServiceAdapter } from '../../infrastructure/adapters';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { RefreshTokensCommand } from '../commands/refresh-tokens.command';
-import { RefreshEntity } from '../../infrastructure/entity/refresh.entity';
 
 @CommandHandler(RefreshTokensCommand)
 export class RefreshTokensHandler implements ICommandHandler<RefreshTokensCommand> {
@@ -15,8 +17,8 @@ export class RefreshTokensHandler implements ICommandHandler<RefreshTokensComman
   constructor(
     private readonly authService: AuthServiceAdapter,
     private readonly userRepository: UserRepository,
-    @InjectRepository(RefreshEntity)
-    private readonly refreshTokenRepository: Repository<RefreshEntity>,
+    @Inject(DRIZZLE_CONNECTION)
+    private readonly db: NodePgDatabase<typeof schema>,
   ) {}
 
   async execute(command: RefreshTokensCommand): Promise<{
@@ -36,9 +38,11 @@ export class RefreshTokensHandler implements ICommandHandler<RefreshTokensComman
     }
 
     // Check if token exists in database and is not revoked
-    const tokenRecord = await this.refreshTokenRepository.findOne({
-      where: { refreshToken: command.refreshToken },
-    });
+    const [tokenRecord] = await this.db
+      .select()
+      .from(refreshTable)
+      .where(eq(refreshTable.refreshToken, command.refreshToken))
+      .limit(1);
 
     if (!tokenRecord) {
       this.logger.warn(`Refresh token not found in database for user ${credentials.userId}`);
@@ -60,9 +64,7 @@ export class RefreshTokensHandler implements ICommandHandler<RefreshTokensComman
     }
 
     // Fetch user from database
-    const user = await this.userRepository.findById(credentials.userId, {
-      loadEagerRelations: false,
-    });
+    const user = await this.userRepository.findById(credentials.userId, { includeRole: false });
 
     if (!user) {
       this.logger.error(`User with ID ${credentials.userId} not found`);
@@ -81,10 +83,10 @@ export class RefreshTokensHandler implements ICommandHandler<RefreshTokensComman
     }
 
     // CRITICAL: Revoke old refresh token (rotation)
-    await this.refreshTokenRepository.update(
-      { id: tokenRecord.id },
-      { isRevoked: true },
-    );
+    await this.db
+      .update(refreshTable)
+      .set({ isRevoked: true })
+      .where(eq(refreshTable.id, tokenRecord.id));
 
     this.logger.log(`Old refresh token revoked for user: ${user.email}`);
 

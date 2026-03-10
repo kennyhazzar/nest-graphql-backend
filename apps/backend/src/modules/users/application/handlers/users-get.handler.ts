@@ -10,7 +10,7 @@ export class UsersGetHandler implements IQueryHandler<UsersGetQuery> {
   constructor(private readonly userRepository: UserRepository) {}
 
   async execute(query: UsersGetQuery): Promise<UsersDto> {
-    const users = await this.userRepository.find(query.options);
+    const users = await this.userRepository.find(query.filter);
     return UserMapper.toDtoList(users);
   }
 }

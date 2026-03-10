@@ -65,7 +65,7 @@ export class UserResolver {
     const accessToken = await this.authService.generateAccessToken({
       userId: user.id,
       roleId: user.roleId,
-      roleType: user.role.type,
+      roleType: user.role!.type,
       language: user.language,
     });
     const refreshToken = await this.authService.generateRefreshToken(user, ctx.req!);

@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MailTemplateEntity } from '../entities/mail-template.entity';
@@ -14,7 +14,7 @@ import { MailTemplateType } from '../../domain/enums/mail-template-type.enum';
  * In production, you might want to use migrations or separate seeding scripts.
  */
 @Injectable()
-export class TemplateSeedService implements OnModuleInit {
+export class TemplateSeedService {
   private readonly logger = new Logger(TemplateSeedService.name);
 
   constructor(
@@ -22,11 +22,7 @@ export class TemplateSeedService implements OnModuleInit {
     private readonly templateRepo: Repository<MailTemplateEntity>,
   ) {}
 
-  async onModuleInit() {
-    await this.seedTemplates();
-  }
-
-  private async seedTemplates() {
+  async seedTemplates() {
     const templates = [
       {
         name: MailTemplateType.WELCOME,

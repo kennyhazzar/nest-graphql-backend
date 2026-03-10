@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { OAuthProviderService, OAuthTokens, OAuthUserInfo } from '../../domain/services/oauth-provider.service';
@@ -9,23 +9,34 @@ import { OAuthProviderService, OAuthTokens, OAuthUserInfo } from '../../domain/s
 @Injectable()
 export class OAuthGoogleAdapter extends OAuthProviderService {
   private readonly logger = new Logger(OAuthGoogleAdapter.name);
-  private readonly clientId: string;
-  private readonly clientSecret: string;
+  private readonly clientId?: string;
+  private readonly clientSecret?: string;
   private readonly scopes: string[];
 
   constructor(private readonly configService: ConfigService) {
     super();
-    this.clientId = this.configService.getOrThrow('oauth.providers.google.clientId');
-    this.clientSecret = this.configService.getOrThrow('oauth.providers.google.clientSecret');
+    this.clientId = this.configService.get('oauth.providers.google.clientId');
+    this.clientSecret = this.configService.get('oauth.providers.google.clientSecret');
     this.scopes = this.configService.get('oauth.providers.google.scopes', [
       'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/userinfo.profile',
     ]);
   }
 
+  isConfigured(): boolean {
+    return !!(this.clientId && this.clientSecret);
+  }
+
+  private requireConfig(): void {
+    if (!this.isConfigured()) {
+      throw new NotImplementedException('Google OAuth provider is not configured');
+    }
+  }
+
   getAuthorizationUrl(state: string, redirectUri: string): string {
+    this.requireConfig();
     const params = new URLSearchParams({
-      client_id: this.clientId,
+      client_id: this.clientId!,
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: this.scopes.join(' '),
@@ -38,14 +49,15 @@ export class OAuthGoogleAdapter extends OAuthProviderService {
   }
 
   async exchangeCodeForToken(code: string, redirectUri: string): Promise<OAuthTokens> {
+    this.requireConfig();
     try {
       const response = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           code,
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
+          client_id: this.clientId!,
+          client_secret: this.clientSecret!,
           redirect_uri: redirectUri,
           grant_type: 'authorization_code',
         }),
@@ -70,6 +82,7 @@ export class OAuthGoogleAdapter extends OAuthProviderService {
   }
 
   async getUserInfo(accessToken: string): Promise<OAuthUserInfo> {
+    this.requireConfig();
     try {
       const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -101,14 +114,15 @@ export class OAuthGoogleAdapter extends OAuthProviderService {
   }
 
   async refreshToken(refreshToken: string): Promise<OAuthTokens> {
+    this.requireConfig();
     try {
       const response = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           refresh_token: refreshToken,
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
+          client_id: this.clientId!,
+          client_secret: this.clientSecret!,
           grant_type: 'refresh_token',
         }),
       });

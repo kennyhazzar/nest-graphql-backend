@@ -3,17 +3,20 @@ import { Algorithm } from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 import * as ms from 'ms';
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Inject, Logger, UnauthorizedException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
-import { DeepPartial, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { and, eq } from 'drizzle-orm';
 
+import { DRIZZLE_CONNECTION } from '@/common/drizzle/drizzle.provider';
+import * as schema from '@/common/drizzle/schema';
+import { refresh as refreshTable } from '@/common/drizzle/schema';
 import { ValidateJWT, JWT_BASE_OPTIONS, JwtPayloadApp } from '@/interfaces/jwt.payload.interface';
 import { AuthMode } from '@/enums';
 import { UserRepository } from '@/modules/users/domain/repositories/user.repository';
-import { RefreshEntity, UserEntity } from '../entity';
+import { User } from '@/modules/users/domain/entities/user.entity';
 
 @Injectable()
 export class AuthServiceAdapter {
@@ -31,8 +34,8 @@ export class AuthServiceAdapter {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
-    @InjectRepository(RefreshEntity)
-    private readonly refreshTokenRepository: Repository<RefreshEntity>,
+    @Inject(DRIZZLE_CONNECTION)
+    private readonly db: NodePgDatabase<typeof schema>,
   ) {
     this.accessTokenExpires = this.configService.getOrThrow<ms.StringValue>('jwt.access.expires');
     this.refreshTokenExpires = this.configService.getOrThrow<ms.StringValue>('jwt.refresh.expires');
@@ -53,7 +56,7 @@ export class AuthServiceAdapter {
   }
 
   async generateRefreshToken(
-    { id: userId, roleId, role, language }: UserEntity,
+    { id: userId, roleId, role, language }: User,
     request: FastifyRequest,
   ): Promise<string> {
     const opts: JwtSignOptions = {
@@ -64,20 +67,19 @@ export class AuthServiceAdapter {
       subject: String(userId),
       expiresIn: this.refreshTokenExpires,
     };
-    const refreshToken = await this.jwtService.signAsync({ rid: roleId, rty: role.type, lng: language }, opts);
+    const refreshToken = await this.jwtService.signAsync({ rid: roleId, rty: role?.type, lng: language }, opts);
 
     const expiresAt = new Date(Date.now() + ms(this.refreshTokenExpires ?? '7days'));
     const fingerprint = (request.headers['x-real-ip'] as string) ?? request.ip;
     const userAgent = request.headers['user-agent'];
-    const refresh: DeepPartial<RefreshEntity> = {
+    void this.db.insert(refreshTable).values({
       userId,
       isRevoked: false,
       fingerprint: fingerprint || 'unknown',
       userAgent: userAgent || 'unknown',
       refreshToken,
       expiresAt,
-    };
-    void this.refreshTokenRepository.save(this.refreshTokenRepository.create(refresh)).catch((error) => {
+    }).catch((error) => {
       this.logger.error(error);
     });
 
@@ -90,9 +92,7 @@ export class AuthServiceAdapter {
       throw new UnauthorizedException('user.auth.invalidJwtPayload');
     }
 
-    const user = await this.userRepository.findById(credentials.userId, {
-      loadEagerRelations: false,
-    });
+    const user = await this.userRepository.findById(credentials.userId, { includeRole: false });
     if (!user) {
       this.logger.error(`User with ID ${credentials.userId} not found`);
       throw new UnauthorizedException('user.notFound');
@@ -150,12 +150,13 @@ export class AuthServiceAdapter {
       }
 
       // Find token in database and mark as revoked
-      const result = await this.refreshTokenRepository.update(
-        { refreshToken, isRevoked: false },
-        { isRevoked: true },
-      );
+      const rows = await this.db
+        .update(refreshTable)
+        .set({ isRevoked: true })
+        .where(and(eq(refreshTable.refreshToken, refreshToken), eq(refreshTable.isRevoked, false)))
+        .returning({ id: refreshTable.id });
 
-      if (result.affected && result.affected > 0) {
+      if (rows.length > 0) {
         this.logger.log(`Refresh token revoked for user ${credentials.userId}`);
         return true;
       }

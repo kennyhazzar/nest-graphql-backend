@@ -1,28 +1,39 @@
-import { FindManyOptions } from 'typeorm';
-
 import type { RoleType } from '@/enums/role-type.enum';
 import type { Actions } from '@/enums/actions.enum';
 import type { Subjects } from '@/enums/subjects.enum';
-import { RolePermissionEntity } from '@/modules/users/infrastructure/entity/role-permission.entity';
+import type { IBaseEntity } from '@/common/domain/base.entity';
 
 /**
- * Abstract repository for role permissions
+ * Domain representation of a role permission — no ORM decorators.
+ */
+export interface IRolePermission extends IBaseEntity {
+  roleType: RoleType;
+  action: Actions;
+  subject: Subjects;
+  description?: string;
+  isActive?: boolean;
+}
+
+export type RolePermissionCreatePayload = Omit<IRolePermission, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+
+/**
+ * Abstract repository for role permissions — no ORM dependency in domain.
  */
 export abstract class RolePermissionRepository {
   /**
    * Find all permissions
    */
-  abstract find(options?: FindManyOptions<RolePermissionEntity>): Promise<RolePermissionEntity[]>;
+  abstract find(filter?: { roleType?: RoleType; isActive?: boolean }): Promise<IRolePermission[]>;
 
   /**
    * Find all permissions and count
    */
-  abstract findAndCount(options?: FindManyOptions<RolePermissionEntity>): Promise<[RolePermissionEntity[], number]>;
+  abstract findAndCount(filter?: { roleType?: RoleType; isActive?: boolean }): Promise<[IRolePermission[], number]>;
 
   /**
    * Find permissions for specific role
    */
-  abstract findByRoleType(roleType: RoleType): Promise<RolePermissionEntity[]>;
+  abstract findByRoleType(roleType: RoleType): Promise<IRolePermission[]>;
 
   /**
    * Check if permission exists for role
@@ -32,12 +43,12 @@ export abstract class RolePermissionRepository {
   /**
    * Create permission
    */
-  abstract create(permission: Partial<RolePermissionEntity>): Promise<RolePermissionEntity>;
+  abstract create(permission: RolePermissionCreatePayload): Promise<IRolePermission>;
 
   /**
    * Create multiple permissions
    */
-  abstract createMany(permissions: Partial<RolePermissionEntity>[]): Promise<RolePermissionEntity[]>;
+  abstract createMany(permissions: RolePermissionCreatePayload[]): Promise<IRolePermission[]>;
 
   /**
    * Delete all permissions for role

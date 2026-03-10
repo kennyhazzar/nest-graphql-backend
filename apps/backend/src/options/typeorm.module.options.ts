@@ -29,7 +29,7 @@ export const TypeOrmDbModuleOptions = (configService: ConfigService): TypeOrmMod
     nativeDriver: true,
     logging: logLevel ? (logLevel.split(',') as LogLevel[]) : false,
     logger: new TypeOrmLogger(),
-    synchronize: configService.get<boolean>('database.synchronize', true),
+    synchronize: configService.get<boolean>('database.synchronize', false),
     entities: [`${pathResolve(__dirname, '..')}/**/*.entity.{ts,js}`],
     migrations: [`${pathResolve(__dirname, '..')}/migrations/*.{ts,js}`],
     migrationsRun: configService.get<boolean>('database.migrationsRun', false),

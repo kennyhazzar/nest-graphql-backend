@@ -23,7 +23,13 @@ export class UserRoleMapper {
 
   static toDomain(entity: UserRoleEntity): UserRole {
     const role = new UserRole();
-    Object.assign(role, entity);
+    role.id = entity.id;
+    role.name = entity.name;
+    role.description = entity.description;
+    role.type = entity.type;
+    role.createdAt = entity.createdAt;
+    role.updatedAt = entity.updatedAt;
+    role.deletedAt = entity.deletedAt;
     return role;
   }
 
@@ -32,11 +38,5 @@ export class UserRoleMapper {
     roles.push(...entities.map((entity) => UserRoleMapper.toDomain(entity)));
     roles.totalCount = totalCount ?? entities.length;
     return roles;
-  }
-
-  static toEntity(role: UserRole): UserRoleEntity {
-    const entity = new UserRoleEntity();
-    Object.assign(entity, role);
-    return entity;
   }
 }

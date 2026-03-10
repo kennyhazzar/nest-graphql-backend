@@ -1,16 +1,19 @@
 import { Algorithm } from 'jsonwebtoken';
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 import { CaslAbilityFactory } from '../../factories/casl-ability.factory';
-import { UserEntity, RefreshEntity, UserRoleEntity, RolePermissionEntity, MagicLinkTokenEntity } from './infrastructure/entity';
 import { UserRepository, RolePermissionRepository, UserRoleRepository, MagicLinkTokenRepository } from './domain/repositories';
 import { PasswordService } from './domain/services/password.service';
-import { UserRepositoryImpl, RolePermissionRepositoryImpl, UserRoleRepositoryImpl, MagicLinkTokenRepositoryImpl } from './infrastructure/repositories';
+import {
+  UserRepositoryDrizzle,
+  UserRoleRepositoryDrizzle,
+  RolePermissionRepositoryDrizzle,
+  MagicLinkTokenRepositoryDrizzle,
+} from './infrastructure/repositories/drizzle';
 import { UserResolver, UserRoleResolver } from './presentation/resolvers';
 import { AuthServiceAdapter } from './infrastructure/adapters/auth-service.adapter';
 import { PasswordServiceAdapter } from './infrastructure/adapters/password-service.adapter';
@@ -37,9 +40,6 @@ import {
   MagicLinkAuthenticateHandler,
 } from './application/handlers';
 
-/**
- * Command handlers for users module
- */
 const CommandHandlers = [
   LoginUserHandler,
   UserLogoutHandler,
@@ -55,9 +55,6 @@ const CommandHandlers = [
   MagicLinkAuthenticateHandler,
 ];
 
-/**
- * Query handlers for users module
- */
 const QueryHandlers = [
   UserGetHandler,
   UserGetByIdHandler,
@@ -67,10 +64,6 @@ const QueryHandlers = [
   UserRolesGetHandler,
 ];
 
-/**
- * Users module with authentication and authorization
- */
-@Global()
 @Module({
   imports: [
     PassportModule,
@@ -84,7 +77,6 @@ const QueryHandlers = [
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([UserEntity, RefreshEntity, UserRoleEntity, RolePermissionEntity, MagicLinkTokenEntity]),
     CqrsModule,
   ],
   providers: [
@@ -96,26 +88,11 @@ const QueryHandlers = [
     AuthServiceAdapter,
     ...CommandHandlers,
     ...QueryHandlers,
-    {
-      provide: UserRepository,
-      useClass: UserRepositoryImpl,
-    },
-    {
-      provide: UserRoleRepository,
-      useClass: UserRoleRepositoryImpl,
-    },
-    {
-      provide: RolePermissionRepository,
-      useClass: RolePermissionRepositoryImpl,
-    },
-    {
-      provide: PasswordService,
-      useClass: PasswordServiceAdapter,
-    },
-    {
-      provide: MagicLinkTokenRepository,
-      useClass: MagicLinkTokenRepositoryImpl,
-    },
+    { provide: UserRepository, useClass: UserRepositoryDrizzle },
+    { provide: UserRoleRepository, useClass: UserRoleRepositoryDrizzle },
+    { provide: RolePermissionRepository, useClass: RolePermissionRepositoryDrizzle },
+    { provide: MagicLinkTokenRepository, useClass: MagicLinkTokenRepositoryDrizzle },
+    { provide: PasswordService, useClass: PasswordServiceAdapter },
   ],
   exports: [
     UserRepository,

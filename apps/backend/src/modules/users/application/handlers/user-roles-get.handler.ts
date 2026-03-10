@@ -10,7 +10,7 @@ export class UserRolesGetHandler implements IQueryHandler<UserRolesGetQuery> {
   constructor(private readonly userRoleRepository: UserRoleRepository) {}
 
   async execute(query: UserRolesGetQuery): Promise<UserRolesDto> {
-    const roles = await this.userRoleRepository.find(query.options);
+    const roles = await this.userRoleRepository.find(query.filter);
     return UserRoleMapper.toDtoList(roles);
   }
 }

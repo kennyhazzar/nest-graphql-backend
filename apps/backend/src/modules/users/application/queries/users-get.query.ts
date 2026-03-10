@@ -1,11 +1,10 @@
 import { Query } from '@nestjs/cqrs';
-import { FindManyOptions } from 'typeorm';
 
 import { UsersDto } from '../../presentation/dtos';
-import { UserEntity } from '../../infrastructure/entity';
+import { UserFilter } from '../../domain/repositories/user.filter';
 
 export class UsersGetQuery extends Query<UsersDto> {
-  constructor(public readonly options?: FindManyOptions<UserEntity>) {
+  constructor(public readonly filter?: UserFilter) {
     super();
   }
 }

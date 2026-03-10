@@ -39,7 +39,30 @@ export class UserMapper {
 
   static toDomain(entity: UserEntity): User {
     const user = new User();
-    Object.assign(user, entity);
+    user.id = entity.id;
+    user.email = entity.email;
+    user.forgotConfirmKey = entity.forgotConfirmKey;
+    user.emailConfirmKey = entity.emailConfirmKey;
+    user.verified = entity.verified;
+    user.password = entity.password;
+    user.name = entity.name;
+    user.surname = entity.surname;
+    user.middleName = entity.middleName;
+    user.phone = entity.phone;
+    user.roleId = entity.roleId;
+    user.gender = entity.gender;
+    user.birthday = entity.birthday;
+    user.blocked = entity.blocked;
+    user.country = entity.country;
+    user.language = entity.language;
+    user.locale = entity.locale;
+    user.theme = entity.theme;
+    user.createdAt = entity.createdAt;
+    user.updatedAt = entity.updatedAt;
+    user.deletedAt = entity.deletedAt;
+    if (entity.role) {
+      user.role = UserRoleMapper.toDomain(entity.role);
+    }
     return user;
   }
 
@@ -48,11 +71,5 @@ export class UserMapper {
     users.push(...entities.map((entity) => UserMapper.toDomain(entity)));
     users.totalCount = totalCount ?? entities.length;
     return users;
-  }
-
-  static toEntity(user: User): UserEntity {
-    const entity = new UserEntity();
-    Object.assign(entity, user);
-    return entity;
   }
 }

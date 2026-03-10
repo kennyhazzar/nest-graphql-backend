@@ -23,6 +23,7 @@ import {
 } from './options';
 
 import { GraphqlSearchQueryModule } from './common/graphql-search-query';
+import { DrizzleModule } from './common/drizzle';
 import { UserLanguageResolver } from './i18n/user-language-resolver';
 import { UsersModule } from './modules/users/users.module';
 import { AuthServiceAdapter } from './modules/users/infrastructure/adapters';
@@ -46,6 +47,8 @@ const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : '
 
     TypeOrmModule.forRootAsync({ useFactory: TypeOrmDbModuleOptions, inject: [ConfigService] }),
 
+    DrizzleModule,
+
     BullModule.forRootAsync({ useFactory: BullmqModuleOptions, inject: [ConfigService] }),
 
     ThrottlerModule.forRootAsync({ useFactory: ThrottlerOptions, inject: [ConfigService] }),
@@ -65,6 +68,7 @@ const CONFIG_FILENAME = process.env.NODE_ENV === 'test' ? 'config.test.yaml' : '
     OAuthModule,
 
     GraphQLModule.forRootAsync<MercuriusDriverConfig>({
+      imports: [UsersModule],
       inject: [ConfigService, AuthServiceAdapter],
       driver: MercuriusDriver,
       useFactory: GraphQLModuleOptions,

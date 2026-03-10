@@ -20,6 +20,7 @@ import { FileAdapter } from './infrastructure/adapters/s3.adapter';
 import { FileRepositoryImpl } from './infrastructure/repositories/file-repository.impl';
 import { FileResolver } from './presentation/resolvers';
 import { FileController } from './presentation/controllers/file.controller';
+import { UsersModule } from '../users/users.module';
 
 /**
  * Обработчики команд для модуля файлов
@@ -49,6 +50,7 @@ const QueryHandlers = [FilesGetHandler, FileGetByIdHandler];
     S3Module.forRootAsync({ useFactory: S3ModuleFuncOptions, inject: [ConfigService] }),
     CqrsModule,
     TypeOrmModule.forFeature([FileEntity, FileVersionEntity]),
+    UsersModule,
   ],
   controllers: [FileController],
   providers: [

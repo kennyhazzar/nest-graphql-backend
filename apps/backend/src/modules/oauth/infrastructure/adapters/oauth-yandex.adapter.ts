@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { OAuthProviderService, OAuthTokens, OAuthUserInfo } from '../../domain/services/oauth-provider.service';
@@ -9,18 +9,29 @@ import { OAuthProviderService, OAuthTokens, OAuthUserInfo } from '../../domain/s
 @Injectable()
 export class OAuthYandexAdapter extends OAuthProviderService {
   private readonly logger = new Logger(OAuthYandexAdapter.name);
-  private readonly clientId: string;
-  private readonly clientSecret: string;
+  private readonly clientId?: string;
+  private readonly clientSecret?: string;
 
   constructor(private readonly configService: ConfigService) {
     super();
-    this.clientId = this.configService.getOrThrow('oauth.providers.yandex.clientId');
-    this.clientSecret = this.configService.getOrThrow('oauth.providers.yandex.clientSecret');
+    this.clientId = this.configService.get('oauth.providers.yandex.clientId');
+    this.clientSecret = this.configService.get('oauth.providers.yandex.clientSecret');
+  }
+
+  isConfigured(): boolean {
+    return !!(this.clientId && this.clientSecret);
+  }
+
+  private requireConfig(): void {
+    if (!this.isConfigured()) {
+      throw new NotImplementedException('Yandex OAuth provider is not configured');
+    }
   }
 
   getAuthorizationUrl(state: string, redirectUri: string): string {
+    this.requireConfig();
     const params = new URLSearchParams({
-      client_id: this.clientId,
+      client_id: this.clientId!,
       response_type: 'code',
       redirect_uri: redirectUri,
       state,
@@ -31,14 +42,15 @@ export class OAuthYandexAdapter extends OAuthProviderService {
   }
 
   async exchangeCodeForToken(code: string, redirectUri: string): Promise<OAuthTokens> {
+    this.requireConfig();
     try {
       const response = await fetch('https://oauth.yandex.ru/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           code,
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
+          client_id: this.clientId!,
+          client_secret: this.clientSecret!,
           grant_type: 'authorization_code',
         }),
       });
@@ -62,6 +74,7 @@ export class OAuthYandexAdapter extends OAuthProviderService {
   }
 
   async getUserInfo(accessToken: string): Promise<OAuthUserInfo> {
+    this.requireConfig();
     try {
       const response = await fetch('https://login.yandex.ru/info?format=json', {
         headers: { Authorization: `OAuth ${accessToken}` },
@@ -101,14 +114,15 @@ export class OAuthYandexAdapter extends OAuthProviderService {
   }
 
   async refreshToken(refreshToken: string): Promise<OAuthTokens> {
+    this.requireConfig();
     try {
       const response = await fetch('https://oauth.yandex.ru/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           refresh_token: refreshToken,
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
+          client_id: this.clientId!,
+          client_secret: this.clientSecret!,
           grant_type: 'refresh_token',
         }),
       });

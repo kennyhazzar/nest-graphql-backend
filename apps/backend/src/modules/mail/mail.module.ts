@@ -121,6 +121,6 @@ const EventHandlers = [UserCreatedEmailEventHandler];
     ...QueryHandlers,
     ...EventHandlers,
   ],
-  exports: [MailRepository, TemplateRepository, MailService, TemplateService],
+  exports: [MailRepository, TemplateRepository, MailService, TemplateService, TemplateSeedService],
 })
 export class MailModule {}

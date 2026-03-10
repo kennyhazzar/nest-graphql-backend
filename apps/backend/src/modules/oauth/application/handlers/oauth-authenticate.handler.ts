@@ -100,7 +100,7 @@ export class OAuthAuthenticateHandler implements ICommandHandler<OAuthAuthentica
         }
 
         // Create new user (password is nullable for OAuth-only users)
-        user = await this.userRepository.create({
+        const newUser = User.create({
           email: userInfo.email,
           name,
           surname,
@@ -109,7 +109,13 @@ export class OAuthAuthenticateHandler implements ICommandHandler<OAuthAuthentica
           language: this.configService.get('settings.language', 'en'),
           locale: this.configService.get('settings.locale', 'en-US'),
           country: this.configService.get('settings.country', 'US'),
-        } as Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'role'>);
+          forgotConfirmKey: null,
+          emailConfirmKey: null,
+          gender: undefined as any,
+          blocked: false,
+          theme: undefined as any,
+        });
+        user = await this.userRepository.create(newUser);
 
         this.logger.log(`New user created via OAuth: ${user.email}`);
       }
@@ -153,7 +159,7 @@ export class OAuthAuthenticateHandler implements ICommandHandler<OAuthAuthentica
     const accessToken = await this.authService.generateAccessToken({
       userId: user.id,
       roleId: user.roleId,
-      roleType: user.role.type,
+      roleType: user.role!.type,
       language: user.language,
     });
     const refreshToken = await this.authService.generateRefreshToken(user, { ip: '0.0.0.0' } as FastifyRequest);

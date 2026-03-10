@@ -31,9 +31,12 @@ export class OAuthProviderFactory {
   }
 
   /**
-   * Get all available provider types
+   * Get all configured (available) provider types
    */
   getAvailableProviders(): OAuthProviderType[] {
-    return [OAuthProviderType.GOOGLE, OAuthProviderType.YANDEX];
+    return [
+      this.googleAdapter.isConfigured() ? OAuthProviderType.GOOGLE : null,
+      this.yandexAdapter.isConfigured() ? OAuthProviderType.YANDEX : null,
+    ].filter((p): p is OAuthProviderType => p !== null);
   }
 }

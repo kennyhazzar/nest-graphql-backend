@@ -1,7 +1,8 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { UsersModule } from '../users/users.module';
 import { IdentityEntity } from '../users/infrastructure/entity/identity.entity';
 import { IdentityRepository } from '../users/domain/repositories/identity.repository';
 import { IdentityRepositoryImpl } from '../users/infrastructure/repositories/identity.repository.impl';
@@ -30,9 +31,8 @@ const QueryHandlers = [OAuthGetProvidersHandler, OAuthGetUserIdentitiesHandler];
  * OAuth module for third-party authentication
  * Provides Google and Yandex OAuth integration
  */
-@Global()
 @Module({
-  imports: [CqrsModule, TypeOrmModule.forFeature([IdentityEntity])],
+  imports: [UsersModule, CqrsModule, TypeOrmModule.forFeature([IdentityEntity])],
   providers: [
     // Adapters
     OAuthGoogleAdapter,
